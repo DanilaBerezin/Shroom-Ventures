@@ -1,11 +1,12 @@
 #include "raylib.h"
+#include "raymath.h"
 #include <stdint.h>
 #include <stdio.h>
 
 #define KEY_NONE 0
 #define MAX_BUILDINGS 100
-#define G 600
-#define PLAYER_JUMP_SPEED 500.0f
+#define G 800
+#define PLAYER_JUMP_SPEED 450.0f
 #define PLAYER_HOR_SPEED 200.0f
 
 // WARNING: macro only works for VLAs or statically declared arrays
@@ -14,9 +15,14 @@
 
 // Debugging macros
 #ifdef DEBUG
-#define DEBUG_BREAK __asm__("int3")        // Raises a SIGTRAP on x86-linux
+// Raises a SIGTRAP on x86-linux, useful when debugging with gdb
+#define DEBUG_BREAK __asm__("int3")         
+#define DEBUG_BRK_COND(cond)                        \
+    if (cond)                                       \
+        DEBUG_BREAK;                                \
 #else 
 #define DEBUG_BREAK
+#define DEBUG_BRK_COND(cond) 
 #endif
 
 
@@ -45,11 +51,28 @@ Platform InitPlatform(float x, float y, float width, float height, bool blocking
     };
 }
 
-Vector2 NextCameraCenter(Camera2D camera, Player player){
-    return (Vector2) { 
-        .x = player.rect.x + player.rect.width, 
-        .y = player.rect.y + player.rect.height 
+Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int height){
+    const float minSpeed = 110;
+    const float minEffectLength = 10;
+    const float fractionSpeed = 3.5f;
+    
+    Vector2 playPos = (Vector2) {
+        .x = player.rect.x + player.rect.width,
+        .y = player.rect.y + player.rect.height
     };
+    Vector2 diff = Vector2Subtract(playPos, camera.target);
+    float length = Vector2Length(diff);
+    if (length > minEffectLength) {
+        float speed = fmaxf(fractionSpeed*length, minSpeed);
+        camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed*delta/length));
+    }
+    
+    camera.offset = (Vector2) { 
+        .x = (float) width/2.0f,
+        .y = (float) height/2.0f
+    };
+
+    return camera;
 }
 
 Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatforms, float delta){
@@ -73,9 +96,6 @@ Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatfor
         if (currRectBot <= platTop && CheckCollisionRecs(noBlockRect, platRect)){
             currPlayer.vertSpeed = 0.0f;
             currPlayer.rect.y = plat.rect.y - currPlayer.rect.height;
-            if (currPlayer.canJump == false){
-                DEBUG_BREAK;
-            }
             currPlayer.canJump = true;
             return currPlayer;
         }
@@ -93,7 +113,7 @@ int main(void){
     const int screenWidth = 800;
     const int screenHeight = 450;
     InitWindow(screenWidth, screenHeight, "Shroom Ventures!");
-    SetExitKey(KEY_NONE);               // Disables the default behavior of closing window on ESC key
+    SetExitKey(KEY_NONE);   // Disables the default behavior of closing window on ESC key
     SetTargetFPS(60);
 
     // Map platforms
@@ -163,7 +183,7 @@ int main(void){
         player = NextPlayer(player, mapPlatforms, NUM_ELS(mapPlatforms), delta);
 
         // Make camera track player
-        camera.target = NextCameraCenter(camera, player);
+        camera = NextCamera(camera, player, delta, screenWidth, screenHeight);
 
         // Draw state here:
         BeginDrawing();
