@@ -52,6 +52,19 @@ Platform InitPlatform(float x, float y, float width, float height, bool blocking
 }
 
 Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int height){
+    const float offsetCoeff = 0.03f;
+    const float maxDiff = 200;
+    float currOffset = camera.offset.x;
+    float offsetTarget = (float) width/2.0f;
+    if(IsKeyDown(KEY_A)){
+        offsetTarget +=  maxDiff;
+    }else if(IsKeyDown(KEY_D)){
+        offsetTarget -= maxDiff;
+    }else{
+        offsetTarget = currOffset;
+    }
+    camera.offset.x += (offsetTarget - currOffset) * offsetCoeff;
+    
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
@@ -67,10 +80,6 @@ Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int 
         camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed*delta/length));
     }
     
-    camera.offset = (Vector2) { 
-        .x = (float) width/2.0f,
-        .y = (float) height/2.0f
-    };
 
     return camera;
 }
