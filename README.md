@@ -9,3 +9,4 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 5) Figure out animations
 6) Figure out basic ai
 7) Create a map loader
+8) Reinstall raylib and link against archive instead of shared library
