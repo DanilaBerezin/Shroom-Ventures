@@ -9,6 +9,7 @@
 #define PLAYER_JUMP_SPEED 450.0f
 #define PLAYER_HOR_SPEED 200.0f
 
+#define MIN(a, b) ((a)<(b) ? (a) : (b))
 // WARNING: macro only works for VLAs or statically declared arrays
 #define NUM_ELS(arr)                                \
     (uint32_t) sizeof(arr)/sizeof(arr[0])           \
@@ -25,7 +26,7 @@
 #define DEBUG_BRK_COND(cond) 
 #endif
 
-
+//Types
 typedef struct {
     Rectangle rect;
     float vertSpeed;
@@ -38,6 +39,7 @@ typedef struct {
     Color color;
 } Platform;
 
+// Functions
 Platform InitPlatform(float x, float y, float width, float height, bool blocking, Color color){
     return (Platform) {
         .rect = (Rectangle) {
@@ -117,14 +119,22 @@ Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatfor
 
 int main(void){
     // Initializing env
-    // --------------------------------------------------------------------------------------------
     // Application stuff 
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-    InitWindow(screenWidth, screenHeight, "Shroom Ventures!");
-    SetExitKey(KEY_NONE);   // Disables the default behavior of closing window on ESC key
+    const int windowWidth = 800;
+    const int windowHeight = 450;
+    const int gameScreenWidth = 1600;
+    const int gameScreenHeight = 900;
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT); // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
+    InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
+    SetWindowMinSize(800, 450);
+    SetExitKey(KEY_NONE);                                    // Disables the default behavior of closing window on ESC key
     SetTargetFPS(60);
 
+    // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and maintaining aspect ratio
+    RenderTexture2D renderTarget = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
+    SetTextureFilter(renderTarget.texture, TEXTURE_FILTER_POINT); 
+    
+    // Game objects
     // Map platforms
     Platform mapPlatforms[] = { InitPlatform(-6000, 320, 13000, 8000, true, GRAY),
                                 InitPlatform(650, 200, 100, 10, true, GRAY),
@@ -142,7 +152,7 @@ int main(void){
         buildings[i] = (Rectangle) {
             .width = width,
             .height = height,
-            .y = (float) screenHeight - ((float) screenHeight - ground.rect.y) - height,
+            .y = (float) gameScreenHeight - ((float) gameScreenHeight - ground.rect.y) - height,
             .x = ground.rect.x + (float) spacing,
         };
 
@@ -177,14 +187,13 @@ int main(void){
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
     camera.offset = (Vector2) { 
-        .x = (float) screenWidth/2.0f, 
-        .y = (float) screenHeight/2.0f 
+        .x = (float) gameScreenWidth/2.0f, 
+        .y = (float) gameScreenHeight/2.0f 
     };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
     // Main game loop
-    // --------------------------------------------------------------------------------------------
     while (!WindowShouldClose()){
         // Update state here:
         // Move player
@@ -192,10 +201,10 @@ int main(void){
         player = NextPlayer(player, mapPlatforms, NUM_ELS(mapPlatforms), delta);
 
         // Make camera track player
-        camera = NextCamera(camera, player, delta, screenWidth, screenHeight);
+        camera = NextCamera(camera, player, delta, gameScreenWidth, gameScreenHeight);
 
         // Draw state here:
-        BeginDrawing();
+        BeginTextureMode(renderTarget);
     
             ClearBackground(RAYWHITE);
             
@@ -215,11 +224,37 @@ int main(void){
 
             DrawText("move rectangle with doom keys", 10, 10, 30, DARKGRAY);
         
+        EndTextureMode();
+
+        // This will draw the texture
+        BeginDrawing();
+            ClearBackground(BLACK);
+
+            float scale = MIN((float)GetScreenWidth()/(float)gameScreenWidth, (float)GetScreenHeight()/(float)gameScreenHeight);
+            Rectangle src = (Rectangle) {
+                .x = 0.0f,
+                .y = 0.0f,
+                .width = (float) renderTarget.texture.width,
+                .height = (float) -renderTarget.texture.height,
+            };
+            // This destination rect will scale the screen while keeping it centered
+            Rectangle dest = (Rectangle) {
+                .x = 0.5f*((float)GetScreenWidth() - ((float)gameScreenWidth*scale)),
+                .y = 0.5f*((float)GetScreenHeight() - ((float)gameScreenHeight*scale)),
+                .width = (float) gameScreenWidth*scale,
+                .height = (float) gameScreenHeight*scale,
+            };
+            Vector2 offset = (Vector2){
+                .x = 0.0f,
+                .y = 0.0f,
+            };
+            
+            DrawTexturePro(renderTarget.texture, src, dest, offset, 0.0f, WHITE);
         EndDrawing();
     }
 
     // Tear-Down env
-    // --------------------------------------------------------------------------------------------
+    UnloadRenderTexture(renderTarget);
     CloseWindow();
     return 0;
 }
