@@ -1,8 +1,11 @@
-target := game
+include config_mk
+
+target := shroom_ventures 
 CC := gcc
 CFLAGS := -Wall -Wextra -Wconversion -Wno-unused-function -Wno-unused-parameter
 CFLAGS += -std=gnu99
-CFLAGS += -I${HOME}/compiled/bin/raylib/include
+CFLAGS += -L$(RAYLIB_INSTALL)/lib 
+CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes
 LIBS := -lGL -lraylib -lm -lpthread -ldl -lrt -lX11 -lc -latomic
 cfiles := $(wildcard *.c)
@@ -16,7 +19,7 @@ debug: CFLAGS += -Werror -g -O0 -D DEBUG
 debug: clean $(target)
 
 $(target): $(objs)
-	$(CC) -L${HOME}/compiled/bin/raylib/lib $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
