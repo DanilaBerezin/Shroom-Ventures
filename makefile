@@ -1,4 +1,4 @@
-include config_mk
+include config.mk
 
 target := shroom_ventures 
 CC := gcc
