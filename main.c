@@ -11,19 +11,14 @@
 
 #define MIN(a, b) ((a)<(b) ? (a) : (b))
 // WARNING: macro only works for VLAs or statically declared arrays
-#define NUM_ELS(arr)                                \
+#define ARRAY_SIZE(arr)                             \
     (uint32_t) sizeof(arr)/sizeof(arr[0])           \
 
 // Debugging macros
 #ifdef DEBUG
-// Raises a SIGTRAP on x86-linux, useful when debugging with gdb
-#define DEBUG_BREAK __asm__("int3")         
-#define DEBUG_BRK_COND(cond)                        \
-    if (cond)                                       \
-        DEBUG_BREAK;                                \
+    #define PRINT_FPS(x,y) DrawFPS((x), (y))
 #else 
-#define DEBUG_BREAK
-#define DEBUG_BRK_COND(cond) 
+    #define PRINT_FPS(x,y)
 #endif
 
 //Types
@@ -198,7 +193,7 @@ int main(void){
         // Update state here:
         // Move player
         float delta = GetFrameTime();
-        player = NextPlayer(player, mapPlatforms, NUM_ELS(mapPlatforms), delta);
+        player = NextPlayer(player, mapPlatforms, ARRAY_SIZE(mapPlatforms), delta);
 
         // Make camera track player
         camera = NextCamera(camera, player, delta, gameScreenWidth, gameScreenHeight);
@@ -215,7 +210,7 @@ int main(void){
                     DrawRectangleRec(buildings[i], buildColors[i]);
                 
                 // Platforms
-                for (uint32_t i = 0; i < NUM_ELS(mapPlatforms); i++)
+                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlatforms); i++)
                     DrawRectangleRec(mapPlatforms[i].rect, mapPlatforms[i].color);
                 
                 // Player
@@ -248,8 +243,9 @@ int main(void){
                 .x = 0.0f,
                 .y = 0.0f,
             };
-            
+
             DrawTexturePro(renderTarget.texture, src, dest, offset, 0.0f, WHITE);
+            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
         EndDrawing();
     }
 

@@ -10,12 +10,13 @@ CFLAGS += -I./includes
 LIBS := -lGL -lraylib -lm -lpthread -ldl -lrt -lX11 -lc -latomic
 cfiles := $(wildcard *.c)
 objs := $(cfiles:.c=.o)
-.PHONY: all clean debug run
+.PHONY: all release clean debug run
 
 all: CFLAGS += -O2
-all: $(target)
+all: $(target)	
+release: clean $(target)
 
-debug: CFLAGS += -Werror -g -O0 -D DEBUG	
+debug: CFLAGS += -Werror -g -O0 -D DEBUG
 debug: clean $(target)
 
 $(target): $(objs)
