@@ -3,11 +3,12 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 
 # Todos
 1) ~~First finish camera~~
-2) Finish character movement control (sprint, crouch etc)
-3) Figure out a pause screen
-4) Create a startup menu
-5) Figure out animations
-6) Figure out basic ai
-7) Create a map loader
-8) Reinstall raylib and link against archive instead of shared library
-9) Make makefile configurable and not dependent on my setup
+2) ~~Create config.mk that also supports compiling on msys~~
+3) Finish character movement control (sprint, crouch etc)
+4) Figure out a pause screen
+5) Create a startup menu
+6) Figure out animations
+7) Figure out basic ai
+8) Create a map loader
+9) Reinstall raylib and link against archive instead of shared library
+10) Make makefile configurable and not dependent on my setup
