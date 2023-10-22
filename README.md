@@ -10,8 +10,8 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 6) Figure out animations
 7) Figure out basic ai
 8) Create a map loader
-9) Reinstall raylib and link against archive instead of shared library
-10) Make makefile configurable and not dependent on my setup
+9) ~~Reinstall raylib and link against archive instead of shared library~~
+10) ~~Make makefile configurable and not dependent on my setup~~
 
 ## Build instructions
 Currently, I support building on MSYS2 with the mingw64 environment on Windows, and natively on linux. This project does depend on **Raylib** which is a beautiful project and you should please take a moment to [check them out](https://github.com/raysan5/raylib/). Before building Shroom Ventures from source, follow the instructions on Raylibs github repo to build and install the Raylib library on your system.
