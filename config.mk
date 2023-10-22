@@ -22,5 +22,5 @@ else ifeq ($(PLATFORM),MSYS)
     target ?= $(target_name).exe
 
 else
-$(error only MSYS2 and LINUX builds are supported at the moment)
+    $(error only MSYS2 and LINUX builds are supported at the moment)
 endif
