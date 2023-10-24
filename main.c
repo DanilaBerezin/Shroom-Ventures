@@ -38,16 +38,14 @@ typedef struct {
 
 // Functions
 Platform InitPlatform(float x, float y, float width, float height, bool blocking, Color color){
-    return (Platform) {
-        .rect = (Rectangle) {
-            .x = x,
-            .y = y,
-            .width = width,
-            .height = height,
-        },
-        .blocking = blocking,
-        .color = color
-    };
+    Platform plat = { 0 };
+    plat.rect.x = x;
+    plat.rect.y = y;
+    plat.rect.width = width;
+    plat.rect.height = height;
+    plat.blocking = blocking;
+    plat.color = color;
+    return plat;
 }
 
 Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int height){
@@ -55,12 +53,12 @@ Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int 
     const float offsetCoeff = 0.03f;
     const float maxDiff = 200;
     float currOffset = camera.offset.x;
-    float offsetTarget = (float) width/2.0f;
+    float offsetTarget = (float) width / 2.0f;
     if (IsKeyDown(KEY_A)){
         offsetTarget +=  maxDiff;
-    }else if (IsKeyDown(KEY_D)){
+    } else if (IsKeyDown(KEY_D)){
         offsetTarget -= maxDiff;
-    }else{
+    } else {
         offsetTarget = currOffset;
     }
     camera.offset.x += (offsetTarget - currOffset) * offsetCoeff;
@@ -69,10 +67,9 @@ Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int 
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    Vector2 playPos = (Vector2) {
-        .x = player.rect.x + player.rect.width,
-        .y = player.rect.y + player.rect.height
-    };
+    Vector2 playPos = { 0 };
+    playPos.x = player.rect.x + player.rect.width;
+    playPos.y = player.rect.y + player.rect.height;
     Vector2 diff = Vector2Subtract(playPos, camera.target);
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
@@ -90,8 +87,7 @@ Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatfor
 
     if (IsKeyDown(KEY_A))
         currPlayer.rect.x -= playSpeed * delta;
-
-    if (IsKeyDown(KEY_D))
+    else if (IsKeyDown(KEY_D))
         currPlayer.rect.x += playSpeed * delta;
 
     if (IsKeyDown(KEY_W) && currPlayer.canJump){
@@ -166,48 +162,37 @@ int main(void){
     for (uint32_t i = 0; i < MAX_BUILDINGS; i++){
         float width = (float) GetRandomValue(50,200);
         float height = (float) GetRandomValue(100,800);
-        buildings[i] = (Rectangle) {
-            .width = width,
-            .height = height,
-            .y = (float) gameScreenHeight - ((float) gameScreenHeight - ground.rect.y) - height,
-            .x = ground.rect.x + (float) spacing,
-        };
+        buildings[i].width = width;
+        buildings[i].height = height;
+        buildings[i].y = (float) gameScreenHeight - ((float) gameScreenHeight - ground.rect.y) - height;
+        buildings[i].x = ground.rect.x + (float) spacing;
 
-        buildColors[i] = (Color) { 
-            .r = (uint8_t) GetRandomValue(200,240), 
-            .g = (uint8_t) GetRandomValue(200,240), 
-            .b = (uint8_t) GetRandomValue(200,250), 
-            .a = 255 
-        };
+        buildColors[i].r = (uint8_t) GetRandomValue(200,240);
+        buildColors[i].g = (uint8_t) GetRandomValue(200,240);
+        buildColors[i].b = (uint8_t) GetRandomValue(200,250);
+        buildColors[i].a = 255;
         
         spacing += (uint32_t) buildings[i].width;
     }
 
     // Player
-    Player player;
-    player.rect = (Rectangle) {
-        .x = 400, 
-        .y = ground.rect.y - 50, 
-        .width = 40, 
-        .height = PLAYER_DEFAULT_HEIGHT 
-    };
+    Player player = { 0 };
+    player.rect.x = 400;
+    player.rect.y = ground.rect.y - 50;
+    player.rect.width = 40; 
+    player.rect.height = PLAYER_DEFAULT_HEIGHT;
     player.vertSpeed = 0.0f;
     player.canJump = true;
     player.isCrouch = false;
-        
 
     // Camera
-    Camera2D camera;
-    camera.target = (Vector2) { 
-        .x = player.rect.x + player.rect.width, 
-        .y = player.rect.y + player.rect.height 
-    };
+    Camera2D camera = { 0 };
+    camera.target.x = player.rect.x + player.rect.width;
+    camera.target.y = player.rect.y + player.rect.height;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
-    camera.offset = (Vector2) { 
-        .x = (float) gameScreenWidth/2.0f, 
-        .y = (float) gameScreenHeight/2.0f 
-    };
+    camera.offset.x = (float) gameScreenWidth/2.0f;
+    camera.offset.y = (float) gameScreenHeight/2.0f;
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -229,18 +214,20 @@ int main(void){
             // Draw stuff in camera coordinates here
             BeginMode2D(camera);
                 // Background buildings
-                for (uint32_t i = 0; i < MAX_BUILDINGS; i++)
+                for (uint32_t i = 0; i < MAX_BUILDINGS; i++){
                     DrawRectangleRec(buildings[i], buildColors[i]);
+                }
                 
                 // Platforms
-                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlatforms); i++)
+                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlatforms); i++){
                     DrawRectangleRec(mapPlatforms[i].rect, mapPlatforms[i].color);
+                }
                 
                 // Player
                 DrawRectangleRec(player.rect, RED); 
             EndMode2D();
 
-            DrawText("move rectangle with doom keys", 10, 10, 30, DARKGRAY);
+            DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
         
         EndTextureMode();
 
@@ -249,23 +236,23 @@ int main(void){
             ClearBackground(BLACK);
 
             float scale = MIN((float)GetScreenWidth()/(float)gameScreenWidth, (float)GetScreenHeight()/(float)gameScreenHeight);
-            Rectangle src = (Rectangle) {
-                .x = 0.0f,
-                .y = 0.0f,
-                .width = (float) renderTarget.texture.width,
-                .height = (float) -renderTarget.texture.height,
-            };
+
+            Rectangle src = { 0 };
+            src.x = 0.0f;
+            src.y = 0.0f;
+            src.width = (float) renderTarget.texture.width;
+            src.height = (float) -renderTarget.texture.height;
+
             // This destination rect will scale the screen while keeping it centered
-            Rectangle dest = (Rectangle) {
-                .x = 0.5f*((float)GetScreenWidth() - ((float)gameScreenWidth*scale)),
-                .y = 0.5f*((float)GetScreenHeight() - ((float)gameScreenHeight*scale)),
-                .width = (float) gameScreenWidth*scale,
-                .height = (float) gameScreenHeight*scale,
-            };
-            Vector2 offset = (Vector2){
-                .x = 0.0f,
-                .y = 0.0f,
-            };
+            Rectangle dest = { 0 };
+            dest.x = 0.5f*((float)GetScreenWidth() - ((float)gameScreenWidth*scale));
+            dest.y = 0.5f*((float)GetScreenHeight() - ((float)gameScreenHeight*scale));
+            dest.width = (float) gameScreenWidth*scale;
+            dest.height = (float) gameScreenHeight*scale;
+
+            Vector2 offset = { 0 };
+            offset.x = 0.0f;
+            offset.y = 0.0f;
 
             DrawTexturePro(renderTarget.texture, src, dest, offset, 0.0f, WHITE);
             PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
