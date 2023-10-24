@@ -3,11 +3,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define KEY_NONE 0
 #define MAX_BUILDINGS 100
 #define G 800
 #define PLAYER_JUMP_SPEED 450.0f
 #define PLAYER_HOR_SPEED 200.0f
+#define PLAYER_SPRINT_SPEED 400.0f
+#define PLAYER_DEFAULT_HEIGHT 40
 
 #define MIN(a, b) ((a)<(b) ? (a) : (b))
 // WARNING: macro only works for VLAs or statically declared arrays
@@ -26,6 +27,7 @@ typedef struct {
     Rectangle rect;
     float vertSpeed;
     bool canJump;
+    bool isCrouch;
 } Player;
 
 typedef struct {
@@ -49,23 +51,24 @@ Platform InitPlatform(float x, float y, float width, float height, bool blocking
 }
 
 Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int height){
+    // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 0.03f;
     const float maxDiff = 200;
     float currOffset = camera.offset.x;
     float offsetTarget = (float) width/2.0f;
-    if(IsKeyDown(KEY_A)){
+    if (IsKeyDown(KEY_A)){
         offsetTarget +=  maxDiff;
-    }else if(IsKeyDown(KEY_D)){
+    }else if (IsKeyDown(KEY_D)){
         offsetTarget -= maxDiff;
     }else{
         offsetTarget = currOffset;
     }
     camera.offset.x += (offsetTarget - currOffset) * offsetCoeff;
     
+    // Smoothing for camera to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    
     Vector2 playPos = (Vector2) {
         .x = player.rect.x + player.rect.width,
         .y = player.rect.y + player.rect.height
@@ -76,19 +79,37 @@ Camera2D NextCamera(Camera2D camera, Player player, float delta, int width, int 
         float speed = fmaxf(fractionSpeed*length, minSpeed);
         camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed*delta/length));
     }
-    
 
     return camera;
 }
 
 Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatforms, float delta){
-    if(IsKeyDown(KEY_A))
-        currPlayer.rect.x -= PLAYER_HOR_SPEED * delta;
-    if(IsKeyDown(KEY_D))
-        currPlayer.rect.x += PLAYER_HOR_SPEED * delta;
-    if(IsKeyDown(KEY_W) && currPlayer.canJump){
+    float playSpeed = PLAYER_HOR_SPEED;
+    if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlayer.isCrouch && currPlayer.canJump)
+        playSpeed = PLAYER_SPRINT_SPEED;
+
+    if (IsKeyDown(KEY_A))
+        currPlayer.rect.x -= playSpeed * delta;
+
+    if (IsKeyDown(KEY_D))
+        currPlayer.rect.x += playSpeed * delta;
+
+    if (IsKeyDown(KEY_W) && currPlayer.canJump){
         currPlayer.vertSpeed = -PLAYER_JUMP_SPEED;
         currPlayer.canJump = false;
+    }
+
+    if (IsKeyDown(KEY_LEFT_CONTROL)){
+        if (!currPlayer.isCrouch){
+            float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2; 
+            currPlayer.rect.height = crouchHeight;
+            currPlayer.rect.y += crouchHeight;
+            currPlayer.isCrouch = true;
+        }
+    } else if (currPlayer.isCrouch){
+        currPlayer.rect.height = PLAYER_DEFAULT_HEIGHT;
+        currPlayer.rect.y -= PLAYER_DEFAULT_HEIGHT / 2;
+        currPlayer.isCrouch = false;
     }
 
     for (uint32_t i = 0; i < numPlatforms; i++){
@@ -97,6 +118,7 @@ Player NextPlayer(Player currPlayer, Platform *mapPlatforms, uint32_t numPlatfor
         Rectangle currRect = currPlayer.rect;
         Rectangle noBlockRect = currRect;
         noBlockRect.y += (currPlayer.vertSpeed + G*delta)*delta;
+
         float currRectBot = currRect.y + currRect.height;
         float platTop = platRect.y;
         if (currRectBot <= platTop && CheckCollisionRecs(noBlockRect, platRect)){
@@ -122,7 +144,7 @@ int main(void){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT); // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(800, 450);
-    SetExitKey(KEY_NONE);                                    // Disables the default behavior of closing window on ESC key
+    SetExitKey(KEY_NULL);                                    // Disables the default behavior of closing window on ESC key
     SetTargetFPS(60);
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and maintaining aspect ratio
@@ -167,10 +189,11 @@ int main(void){
         .x = 400, 
         .y = ground.rect.y - 50, 
         .width = 40, 
-        .height = 40 
+        .height = PLAYER_DEFAULT_HEIGHT 
     };
     player.vertSpeed = 0.0f;
     player.canJump = true;
+    player.isCrouch = false;
         
 
     // Camera
