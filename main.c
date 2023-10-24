@@ -208,7 +208,6 @@ int main(void){
 
         // Draw state here:
         BeginTextureMode(renderTarget);
-    
             ClearBackground(RAYWHITE);
             
             // Draw stuff in camera coordinates here
@@ -226,9 +225,7 @@ int main(void){
                 // Player
                 DrawRectangleRec(player.rect, RED); 
             EndMode2D();
-
             DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
-        
         EndTextureMode();
 
         // This will draw the texture
