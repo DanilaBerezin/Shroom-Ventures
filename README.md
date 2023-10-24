@@ -4,7 +4,7 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 ## Todos
 1) ~~First finish camera~~
 2) ~~Create config.mk that also supports compiling on msys~~
-3) Finish character movement control (sprint, crouch etc)
+3) ~~Finish character movement control (sprint, crouch etc)~~
 4) Figure out a pause screen
 5) Create a startup menu
 6) Figure out animations
