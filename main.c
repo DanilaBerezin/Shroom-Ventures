@@ -40,7 +40,12 @@ typedef struct {
 } Platform;
 
 // Functions
-Platform InitPlatform(float x, float y, float width, float height, bool block, Color color) {
+Platform InitPlatform(float x,
+                      float y,
+                      float width,
+                      float height,
+                      bool block,
+                      Color color) {
     Platform plat = { 0 };
     plat.rect.x = x;
     plat.rect.y = y;
@@ -51,7 +56,11 @@ Platform InitPlatform(float x, float y, float width, float height, bool block, C
     return plat;
 }
 
-Camera2D NextCamera(Camera2D camera, Player play, float delta, int width, int height) {
+Camera2D NextCamera(Camera2D camera,
+                    Player play,
+                    float delta,
+                    int width,
+                    int height) {
     // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 0.03f;
     const float maxDiff = 200;
