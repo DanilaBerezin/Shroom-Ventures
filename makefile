@@ -8,7 +8,7 @@ CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes
 cfiles := $(wildcard *.c)
 objs := $(cfiles:.c=.o)
-.PHONY: all release clean debug run
+.PHONY: all release clean debug debug_target run
 
 all: debug_target
 release: CFLAGS += -O2
@@ -27,7 +27,7 @@ $(target): $(objs)
 clean: 
 	-@rm -f $(target) $(objs)
 
-run: $(target)
+run: debug_target
 	@./$(target)
 
 # Target for devs only, compiles for a windows target and runs on a linux host. Requires
