@@ -98,70 +98,81 @@ Player NextPlayer(Player currPlay,
                   float delta) {
     Player nextPlay = { 0 };
     nextPlay.rect.width = currPlay.rect.width;
-    nextPlay.rect.height = currPlay.rect.height;
-    
-    // Sprint logic
-    float playSpeed = PLAYER_HOR_SPEED;
-    if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch 
-                                  && currPlay.canJump) {
-        playSpeed = PLAYER_SPRINT_SPEED;
-    }
-    
-    // Direction logic 
-    if (IsKeyDown(KEY_A)){
-        nextPlay.rect.x = currPlay.rect.x - playSpeed * delta;
-    } else if (IsKeyDown(KEY_D)) {
-        nextPlay.rect.x = currPlay.rect.x + playSpeed * delta;
-    } else {
-        nextPlay.rect.x = currPlay.rect.x;
-    }
-    
-    // Jump logic
-    if (IsKeyDown(KEY_W) && currPlay.canJump){
-        nextPlay.vertSpeed = -PLAYER_JUMP_SPEED;
-        nextPlay.canJump = false;
-    } else {
-        nextPlay.vertSpeed = currPlay.vertSpeed + G * delta;
-        nextPlay.canJump = currPlay.canJump;
-    }
 
-    // Collision logic
+    // Check for collisions
+    bool willColl = false;
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
 
         Rectangle currRect = currPlay.rect;
-        Rectangle nextRect = nextPlay.rect;
-        nextRect.y = currRect.y + (nextPlay.vertSpeed) * delta;
+        Rectangle nextRect = currRect;
+        nextRect.y = currRect.y + (currPlay.vertSpeed) * delta;
 
-        float currRectBot = currRect.y + currRect.height;
-        float platTop = plat.rect.y;
-        if (currRectBot <= platTop && CheckCollisionRecs(nextRect, plat.rect)) {
-            nextPlay.vertSpeed = 0.0f;
-            nextPlay.rect.y = plat.rect.y - currRect.height;
-            nextPlay.canJump = true;
+        // float currRectBot = currRect.y + currRect.height;
+        // float platTop = plat.rect.y;
+        if (currPlay.vertSpeed >= 0 && CheckCollisionRecs(nextRect, plat.rect)) {
+            willColl = true;
             break;
         }
+    }
+    
+    // Calculate x-component of velocity
+    float horSpeed;
+    if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch
+                                  && willColl) {
+        horSpeed = PLAYER_SPRINT_SPEED;
+    } else {
+        horSpeed = PLAYER_HOR_SPEED;
+    }
 
-        nextPlay.rect = nextRect;
-    } 
+    // Calculate y-component of velocity
+    if (IsKeyDown(KEY_W) && willColl) {
+        nextPlay.vertSpeed = -PLAYER_JUMP_SPEED;
+    } else if(!IsKeyDown(KEY_W) && willColl) {
+        nextPlay.vertSpeed = 0;
+    } else {
+        nextPlay.vertSpeed = currPlay.vertSpeed + G * delta;
+    }
 
-    // Crouch logic. Unfortunately because it changes the value of the y-component
-    // of player position, it is coupled to the collision logic and must happen
-    // after it.
-    if (IsKeyDown(KEY_LEFT_CONTROL) && !currPlay.isCrouch) {
-        float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2; 
-        nextPlay.rect.height = crouchHeight;
+    // Calculate x-component of position. Coupled to x-component of velocity, so has
+    // to be calucated after x-component of velocity is calculated
+    if (IsKeyDown(KEY_A)) {
+        nextPlay.rect.x = currPlay.rect.x - horSpeed * delta;
+    } else if (IsKeyDown(KEY_D)) {
+        nextPlay.rect.x = currPlay.rect.x + horSpeed * delta;
+    } else {
+        nextPlay.rect.x = currPlay.rect.x;
+    }
+
+    // Calculate y-component of position. Coupled to y-component of velocity, so has
+    // to be calculated after y-component of velocity is calculated
+    nextPlay.rect.y = currPlay.rect.y + nextPlay.vertSpeed * delta;
+    // if (willColl) {
+    //     printf("THERE IS A COLLISION !!!!!\n");
+    //     printf("currPlay.rect.y: %f\n", currPlay.rect.y);
+    //     printf("nextPlay.rect.y: %f\n", nextPlay.rect.y);
+    //     printf("nextPlay.vertSpeed: %f\n", nextPlay.vertSpeed);
+    // } else {
+    //     printf("currPlay.rect.y: %f\n", currPlay.rect.y);
+    //     printf("nextPlay.rect.y: %f\n", nextPlay.rect.y);
+    //     printf("nextPlay.vertSpeed: %f\n", nextPlay.vertSpeed);
+    // }
+
+    // Crouch logic changed y-position, so is unfortunately coupled to y-position
+    // calculations and has to be run after y-position is calculated
+    float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2;
+    if (IsKeyDown(KEY_LEFT_CONTROL) && !currPlay.isCrouch) { 
         nextPlay.rect.y = nextPlay.rect.y + crouchHeight;
+        nextPlay.rect.height = crouchHeight;
         nextPlay.isCrouch = true;
     } else if (!IsKeyDown(KEY_LEFT_CONTROL) && currPlay.isCrouch) {
+        nextPlay.rect.y = nextPlay.rect.y - crouchHeight;
         nextPlay.rect.height = PLAYER_DEFAULT_HEIGHT;
-        nextPlay.rect.y = nextPlay.rect.y - PLAYER_DEFAULT_HEIGHT / 2;
-        nextPlay.isCrouch = false;
     } else {
         nextPlay.rect.height = currPlay.rect.height;
         nextPlay.isCrouch = currPlay.isCrouch;
     }
-    
+
     return nextPlay;
 }
 
