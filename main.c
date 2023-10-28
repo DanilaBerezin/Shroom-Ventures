@@ -56,15 +56,19 @@ Platform InitPlatform(float x,
     return plat;
 }
 
-Camera2D NextCamera(Camera2D camera,
+Camera2D NextCamera(Camera2D currCam,
                     Player play,
                     float delta,
                     int width,
                     int height) {
+    Camera2D nextCam = { 0 };
+    nextCam.rotation = currCam.rotation;
+    nextCam.zoom = currCam.zoom;
+
     // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 0.03f;
     const float maxDiff = 200;
-    float currOffset = camera.offset.x;
+    float currOffset = currCam.offset.x;
     float offsetTarget = (float) width / 2.0f;
     if (IsKeyDown(KEY_A)){
         offsetTarget +=  maxDiff;
@@ -73,23 +77,26 @@ Camera2D NextCamera(Camera2D camera,
     } else {
         offsetTarget = currOffset;
     }
-    camera.offset.x += (offsetTarget - currOffset) * offsetCoeff;
+    nextCam.offset.x = currOffset + (offsetTarget - currOffset) * offsetCoeff;
+    nextCam.offset.y = currCam.offset.y;
     
-    // Smoothing for camera to follow target (player in this case)
+    // Smoothing for currCam to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
     Vector2 playPos = { 0 };
     playPos.x = play.rect.x + play.rect.width;
     playPos.y = play.rect.y + play.rect.height;
-    Vector2 diff = Vector2Subtract(playPos, camera.target);
+    Vector2 diff = Vector2Subtract(playPos, currCam.target);
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
-        float speed = fmaxf(fractionSpeed*length, minSpeed);
-        camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed*delta/length));
+        float speed = fmaxf(fractionSpeed * length, minSpeed);
+        nextCam.target = Vector2Add(currCam.target, Vector2Scale(diff, speed * delta / length));
+    } else {
+        nextCam.target = currCam.target;
     }
 
-    return camera;
+    return nextCam;
 }
 
 Player NextPlayer(Player currPlay, 
