@@ -103,11 +103,15 @@ Player NextPlayer(Player currPlay,
     bool willColl = false;
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
-
+        
+        // Calculate what the next rectangle's position would be assuming no collision happened
         Rectangle currRect = currPlay.rect;
         Rectangle nextRect = currRect;
-        nextRect.y = currRect.y + (currPlay.vertSpeed) * delta;
-        if (currPlay.vertSpeed >= 0 && CheckCollisionRecs(nextRect, plat.rect)) {
+        nextRect.y = currRect.y + (currPlay.vertSpeed + G * delta) * delta;
+
+        float currRectBot = currRect.y + currRect.height;
+        float platTop = plat.rect.y;
+        if (currRectBot <= platTop && CheckCollisionRecs(nextRect, plat.rect)) {
             willColl = true;
             break;
         }
