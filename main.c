@@ -107,9 +107,6 @@ Player NextPlayer(Player currPlay,
         Rectangle currRect = currPlay.rect;
         Rectangle nextRect = currRect;
         nextRect.y = currRect.y + (currPlay.vertSpeed) * delta;
-
-        // float currRectBot = currRect.y + currRect.height;
-        // float platTop = plat.rect.y;
         if (currPlay.vertSpeed >= 0 && CheckCollisionRecs(nextRect, plat.rect)) {
             willColl = true;
             break;
@@ -147,16 +144,6 @@ Player NextPlayer(Player currPlay,
     // Calculate y-component of position. Coupled to y-component of velocity, so has
     // to be calculated after y-component of velocity is calculated
     nextPlay.rect.y = currPlay.rect.y + nextPlay.vertSpeed * delta;
-    // if (willColl) {
-    //     printf("THERE IS A COLLISION !!!!!\n");
-    //     printf("currPlay.rect.y: %f\n", currPlay.rect.y);
-    //     printf("nextPlay.rect.y: %f\n", nextPlay.rect.y);
-    //     printf("nextPlay.vertSpeed: %f\n", nextPlay.vertSpeed);
-    // } else {
-    //     printf("currPlay.rect.y: %f\n", currPlay.rect.y);
-    //     printf("nextPlay.rect.y: %f\n", nextPlay.rect.y);
-    //     printf("nextPlay.vertSpeed: %f\n", nextPlay.vertSpeed);
-    // }
 
     // Crouch logic changed y-position, so is unfortunately coupled to y-position
     // calculations and has to be run after y-position is calculated
