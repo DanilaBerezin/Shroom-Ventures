@@ -95,7 +95,6 @@ Camera2D NextCamera(Camera2D currCam,
     } else {
        nextCam.target = currCam.target;
     }
-    nextCam.target = playPos;
 
     return nextCam;
 }
