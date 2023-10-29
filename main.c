@@ -13,7 +13,8 @@
 #define PLAYER_SPRINT_SPEED 400.0f
 #define PLAYER_DEFAULT_HEIGHT 40
 
-#define MIN(a, b) ((a)<(b) ? (a) : (b))
+#define MIN(a, b)                                   \
+    ((a) < (b) ? (a) : (b))                         \
 // WARNING: macro only works for VLAs or statically declared arrays
 #define ARRAY_SIZE(arr)                             \
     (uint32_t) sizeof(arr)/sizeof(arr[0])           \
@@ -29,7 +30,6 @@
 typedef struct {
     Rectangle   rect;
     float       vertSpeed;
-    bool        canJump;
     bool        isCrouch;
 } Player;
 
@@ -93,8 +93,9 @@ Camera2D NextCamera(Camera2D currCam,
         float speed = fmaxf(fractionSpeed * length, minSpeed);
         nextCam.target = Vector2Add(currCam.target, Vector2Scale(diff, speed * delta / length));
     } else {
-        nextCam.target = currCam.target;
+       nextCam.target = currCam.target;
     }
+    nextCam.target = playPos;
 
     return nextCam;
 }
@@ -107,7 +108,10 @@ Player NextPlayer(Player currPlay,
     nextPlay.rect.width = currPlay.rect.width;
 
     // Check for collisions
-    bool willColl = false;
+    struct col {
+        Platform plat;
+        bool willColl;
+    } colInfo = { 0 };
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
         
@@ -119,7 +123,8 @@ Player NextPlayer(Player currPlay,
         float currRectBot = currRect.y + currRect.height;
         float platTop = plat.rect.y;
         if (currRectBot <= platTop && CheckCollisionRecs(nextRect, plat.rect)) {
-            willColl = true;
+            colInfo.plat = plat;
+            colInfo.willColl = true;
             break;
         }
     }
@@ -127,16 +132,16 @@ Player NextPlayer(Player currPlay,
     // Calculate x-component of velocity
     float horSpeed;
     if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch
-                                  && willColl) {
+                                  && colInfo.willColl) {
         horSpeed = PLAYER_SPRINT_SPEED;
     } else {
         horSpeed = PLAYER_HOR_SPEED;
     }
 
     // Calculate y-component of velocity
-    if (IsKeyDown(KEY_W) && willColl) {
+    if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vertSpeed = -PLAYER_JUMP_SPEED;
-    } else if(!IsKeyDown(KEY_W) && willColl) {
+    } else if(!IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vertSpeed = 0;
     } else {
         nextPlay.vertSpeed = currPlay.vertSpeed + G * delta;
@@ -154,7 +159,12 @@ Player NextPlayer(Player currPlay,
 
     // Calculate y-component of position. Coupled to y-component of velocity, so has
     // to be calculated after y-component of velocity is calculated
-    nextPlay.rect.y = currPlay.rect.y + nextPlay.vertSpeed * delta;
+    if (colInfo.willColl) {
+        Platform colPlat = colInfo.plat;
+        nextPlay.rect.y = colPlat.rect.y - currPlay.rect.height;
+    } else {
+        nextPlay.rect.y = currPlay.rect.y + nextPlay.vertSpeed * delta;
+    }
 
     // Crouch logic changed y-position, so is unfortunately coupled to y-position
     // calculations and has to be run after y-position is calculated
@@ -226,7 +236,6 @@ int main(void) {
     play.rect.width = 40; 
     play.rect.height = PLAYER_DEFAULT_HEIGHT;
     play.vertSpeed = 0.0f;
-    play.canJump = true;
     play.isCrouch = false;
 
     // Camera
