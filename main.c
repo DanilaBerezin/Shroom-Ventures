@@ -67,10 +67,10 @@ Platform InitPlatforms(float x,
 }
 
 // NOTE: for some reason the smoothing here ends up resulting in a 
-// sort of course grain appearance probably something internal to
+// sort of course grain appearance. Probably something internal to
 // raylib though the devs deny it lol. Funnily enough casting the 
 // values to ints makes it look a bit smoother imo and rounding
-// doesn't seem to make a difference. Oh well I'll tinker with this
+// doesn't seem to make a difference? Oh well I'll tinker with this
 // later
 Camera2D NextCamera(Camera2D currCam,
                     Player play,
@@ -113,6 +113,15 @@ Camera2D NextCamera(Camera2D currCam,
     return nextCam;
 }
 
+Rectangle RectFromPlayer(Player play) {
+    Rectangle playRect = { 0 };
+    playRect.x = play.pos.x;
+    playRect.y = play.pos.y;
+    playRect.height = play.height;
+    playRect.width = play.width;
+    return playRect;
+}
+
 Player NextPlayer(Player currPlay, 
                   Platform *mapPlat, 
                   uint32_t numPlatforms, 
@@ -121,19 +130,12 @@ Player NextPlayer(Player currPlay,
     nextPlay.width = currPlay.width;
 
     // Check for collisions
-    struct col {
-        Platform plat;
-        bool willColl;
-    } colInfo = { 0 };
+    struct { Platform plat; bool willColl; } colInfo = { 0 };
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
         
         // Calculate what the next rectangle's position would be assuming no collision happened
-        Rectangle currRect = { 0 };
-        currRect.x = currPlay.pos.x;
-        currRect.y = currPlay.pos.y;
-        currRect.width = currPlay.width;
-        currRect.height = currPlay.height;
+        Rectangle currRect = RectFromPlayer(currPlay);
         Rectangle nextRect = currRect;
         nextRect.y = currRect.y + (currPlay.vel.y + G * delta) * delta;
 
@@ -291,12 +293,7 @@ int main(void) {
                 }
                 
                 // Player
-                Rectangle playRect = { 0 };
-                playRect.x = play.pos.x;
-                playRect.y = play.pos.y;
-                playRect.height = play.height;
-                playRect.width = play.width;
-                DrawRectangleRec(playRect, RED); 
+                DrawRectangleRec(RectFromPlayer(play), RED); 
             EndMode2D();
 
             DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
