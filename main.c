@@ -28,8 +28,10 @@
 
 //Types
 typedef struct {
-    Rectangle   rect;
-    float       vertSpeed;
+    Vector2     pos;
+    Vector2     vel;
+    float       width;
+    float       height;
     bool        isCrouch;
 } Player;
 
@@ -66,7 +68,10 @@ Platform InitPlatforms(float x,
 
 // NOTE: for some reason the smoothing here ends up resulting in a 
 // sort of course grain appearance probably something internal to
-// raylib though the devs deny it lol
+// raylib though the devs deny it lol. Funnily enough casting the 
+// values to ints makes it look a bit smoother imo and rounding
+// doesn't seem to make a difference. Oh well I'll tinker with this
+// later
 Camera2D NextCamera(Camera2D currCam,
                     Player play,
                     float delta,
@@ -77,7 +82,7 @@ Camera2D NextCamera(Camera2D currCam,
     nextCam.zoom = currCam.zoom;
 
     // PID smoothing for camera motion when you move left or right
-    const float offsetCoeff = 2.0f;
+    const float offsetCoeff = 1.5f;
     const float maxDiff = 200;
     float currOffset = currCam.offset.x;
     float offsetTarget = (float) width / 2.0f;
@@ -89,17 +94,14 @@ Camera2D NextCamera(Camera2D currCam,
         offsetTarget = currOffset;
     }
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * delta;
+    nextCam.offset.x = currOffset + offSpeed * delta; 
     nextCam.offset.y = currCam.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    Vector2 playPos = { 0 };
-    playPos.x = play.rect.x + play.rect.width;
-    playPos.y = play.rect.y + play.rect.height;
-    Vector2 diff = Vector2Subtract(playPos, currCam.target);
+    Vector2 diff = Vector2Subtract(play.pos, currCam.target);
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
         float speed = fmaxf(fractionSpeed * length, minSpeed);
@@ -116,7 +118,7 @@ Player NextPlayer(Player currPlay,
                   uint32_t numPlatforms, 
                   float delta) {
     Player nextPlay = { 0 };
-    nextPlay.rect.width = currPlay.rect.width;
+    nextPlay.width = currPlay.width;
 
     // Check for collisions
     struct col {
@@ -127,9 +129,13 @@ Player NextPlayer(Player currPlay,
         Platform plat = mapPlat[i];
         
         // Calculate what the next rectangle's position would be assuming no collision happened
-        Rectangle currRect = currPlay.rect;
+        Rectangle currRect = { 0 };
+        currRect.x = currPlay.pos.x;
+        currRect.y = currPlay.pos.y;
+        currRect.width = currPlay.width;
+        currRect.height = currPlay.height;
         Rectangle nextRect = currRect;
-        nextRect.y = currRect.y + (currPlay.vertSpeed + G * delta) * delta;
+        nextRect.y = currRect.y + (currPlay.vel.y + G * delta) * delta;
 
         float currRectBot = currRect.y + currRect.height;
         float platTop = plat.rect.y;
@@ -141,54 +147,53 @@ Player NextPlayer(Player currPlay,
     }
     
     // Calculate x-component of velocity
-    float horSpeed;
     if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch
                                   && colInfo.willColl) {
-        horSpeed = PLAYER_SPRINT_SPEED;
+        nextPlay.vel.x = PLAYER_SPRINT_SPEED;
     } else {
-        horSpeed = PLAYER_HOR_SPEED;
+        nextPlay.vel.x = PLAYER_HOR_SPEED;
     }
 
     // Calculate y-component of velocity
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
-        nextPlay.vertSpeed = -PLAYER_JUMP_SPEED;
+        nextPlay.vel.y = -PLAYER_JUMP_SPEED;
     } else if(!IsKeyDown(KEY_W) && colInfo.willColl) {
-        nextPlay.vertSpeed = 0;
+        nextPlay.vel.y = 0;
     } else {
-        nextPlay.vertSpeed = currPlay.vertSpeed + G * delta;
+        nextPlay.vel.y = currPlay.vel.y + G * delta;
     }
 
     // Calculate x-component of position. Coupled to x-component of velocity, so has
     // to be calucated after x-component of velocity is calculated
     if (IsKeyDown(KEY_A)) {
-        nextPlay.rect.x = currPlay.rect.x - horSpeed * delta;
+        nextPlay.pos.x = currPlay.pos.x - nextPlay.vel.x * delta;
     } else if (IsKeyDown(KEY_D)) {
-        nextPlay.rect.x = currPlay.rect.x + horSpeed * delta;
+        nextPlay.pos.x = currPlay.pos.x + nextPlay.vel.x * delta;
     } else {
-        nextPlay.rect.x = currPlay.rect.x;
+        nextPlay.pos.x = currPlay.pos.x;
     }
 
     // Calculate y-component of position. Coupled to y-component of velocity, so has
     // to be calculated after y-component of velocity is calculated
     if (colInfo.willColl) {
         Platform colPlat = colInfo.plat;
-        nextPlay.rect.y = colPlat.rect.y - currPlay.rect.height;
+        nextPlay.pos.y = colPlat.rect.y - currPlay.height;
     } else {
-        nextPlay.rect.y = currPlay.rect.y + nextPlay.vertSpeed * delta;
+        nextPlay.pos.y = currPlay.pos.y + nextPlay.vel.y * delta;
     }
 
     // Crouch logic changed y-position, so is unfortunately coupled to y-position
     // calculations and has to be run after y-position is calculated
     float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2;
     if (IsKeyDown(KEY_LEFT_CONTROL) && !currPlay.isCrouch) { 
-        nextPlay.rect.y = nextPlay.rect.y + crouchHeight;
-        nextPlay.rect.height = crouchHeight;
+        nextPlay.pos.y = nextPlay.pos.y + crouchHeight;
+        nextPlay.height = crouchHeight;
         nextPlay.isCrouch = true;
     } else if (!IsKeyDown(KEY_LEFT_CONTROL) && currPlay.isCrouch) {
-        nextPlay.rect.y = nextPlay.rect.y - crouchHeight;
-        nextPlay.rect.height = PLAYER_DEFAULT_HEIGHT;
+        nextPlay.pos.y = nextPlay.pos.y - crouchHeight;
+        nextPlay.height = PLAYER_DEFAULT_HEIGHT;
     } else {
-        nextPlay.rect.height = currPlay.rect.height;
+        nextPlay.height = currPlay.height;
         nextPlay.isCrouch = currPlay.isCrouch;
     }
 
@@ -242,17 +247,16 @@ int main(void) {
 
     // Player
     Player play = { 0 };
-    play.rect.x = 400;
-    play.rect.y = gnd.rect.y - 50;
-    play.rect.width = 40; 
-    play.rect.height = PLAYER_DEFAULT_HEIGHT;
-    play.vertSpeed = 0.0f;
+    play.pos.x = 400;
+    play.pos.y = gnd.rect.y - 50;
+    play.width = 40; 
+    play.height = PLAYER_DEFAULT_HEIGHT;
+    play.vel.y = 0.0f;
     play.isCrouch = false;
 
     // Camera
     Camera2D camera = { 0 };
-    camera.target.x = play.rect.x + play.rect.width;
-    camera.target.y = play.rect.y + play.rect.height;
+    camera.target = play.pos;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
     camera.offset.x = (float) gameWidth / 2.0f;
@@ -287,7 +291,12 @@ int main(void) {
                 }
                 
                 // Player
-                DrawRectangleRec(play.rect, RED); 
+                Rectangle playRect = { 0 };
+                playRect.x = play.pos.x;
+                playRect.y = play.pos.y;
+                playRect.height = play.height;
+                playRect.width = play.width;
+                DrawRectangleRec(playRect, RED); 
             EndMode2D();
 
             DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
