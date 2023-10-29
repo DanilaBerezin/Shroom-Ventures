@@ -40,12 +40,20 @@ typedef struct {
 } Platform;
 
 // Functions
-Platform InitPlatform(float x,
-                      float y,
-                      float width,
-                      float height,
-                      bool block,
-                      Color color) {
+float GetDeltaTime(void){
+#ifdef DEBUG
+    return 1.0f / 60.0f;
+#else
+    return GetFrameTime();
+#endif
+}
+
+Platform InitPlatforms(float x,
+                       float y,
+                       float width,
+                       float height,
+                       bool block,
+                       Color color) {
     Platform plat = { 0 };
     plat.rect.x = x;
     plat.rect.y = y;
@@ -56,6 +64,9 @@ Platform InitPlatform(float x,
     return plat;
 }
 
+// NOTE: for some reason the smoothing here ends up resulting in a 
+// sort of course grain appearance probably something internal to
+// raylib though the devs deny it lol
 Camera2D NextCamera(Camera2D currCam,
                     Player play,
                     float delta,
@@ -66,7 +77,7 @@ Camera2D NextCamera(Camera2D currCam,
     nextCam.zoom = currCam.zoom;
 
     // PID smoothing for camera motion when you move left or right
-    const float offsetCoeff = 0.03f;
+    const float offsetCoeff = 2.0f;
     const float maxDiff = 200;
     float currOffset = currCam.offset.x;
     float offsetTarget = (float) width / 2.0f;
@@ -77,7 +88,8 @@ Camera2D NextCamera(Camera2D currCam,
     } else {
         offsetTarget = currOffset;
     }
-    nextCam.offset.x = currOffset + (offsetTarget - currOffset) * offsetCoeff;
+    float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
+    nextCam.offset.x = currOffset + offSpeed * delta;
     nextCam.offset.y = currCam.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
@@ -202,10 +214,10 @@ int main(void) {
     
     // Game objects
     // Map platforms
-    Platform mapPlat[] = { InitPlatform(-6000, 320, 13000, 8000, true, GRAY),
-                           InitPlatform(650, 200, 100, 10, true, GRAY),
-                           InitPlatform(250, 200, 100, 10, true, GRAY),
-                           InitPlatform(300, 100, 400, 10, true, GRAY), };
+    Platform mapPlat[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
+                           InitPlatforms(650, 200, 100, 10, true, GRAY),
+                           InitPlatforms(250, 200, 100, 10, true, GRAY),
+                           InitPlatforms(300, 100, 400, 10, true, GRAY), };
 
     // Background buildings 
     Rectangle builds[MAX_BUILDINGS];
@@ -243,8 +255,8 @@ int main(void) {
     camera.target.y = play.rect.y + play.rect.height;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
-    camera.offset.x = gameWidth / 2.0f;
-    camera.offset.y = gameHeight / 2.0f;
+    camera.offset.x = (float) gameWidth / 2.0f;
+    camera.offset.y = (float) gameHeight / 2.0f;
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -252,7 +264,7 @@ int main(void) {
     while (!WindowShouldClose()){
         // Update state here:
         // Move player
-        float delta = GetFrameTime();
+        float delta = GetDeltaTime();
         play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
 
         // Make camera track player
@@ -295,8 +307,8 @@ int main(void) {
 
             // This destination rect will scale the screen while keeping it centered
             Rectangle dest = { 0 };
-            dest.x = 0.5f * (GetScreenWidth() - gameWidth * scale);
-            dest.y = 0.5f * (GetScreenHeight() - gameHeight * scale);
+            dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
+            dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
             dest.width = gameWidth * scale;
             dest.height = gameHeight * scale;
 
