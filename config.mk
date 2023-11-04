@@ -13,13 +13,13 @@ ifeq ($(PLATFORM),LINUX)
     # Linux defaults
     RAYLIB_INSTALL ?= /usr/local
     LIBS ?= -lGL -lraylib -lm -lpthread -ldl -lrt -lX11 -lc -latomic
-    target ?= $(target_name)
+    target ?= ./bin/$(target_name)
 
 else ifeq ($(PLATFORM),MSYS)
     # MSYS2 defaults
     RAYLIB_INSTALL ?= /mingw64
     LIBS ?= -lraylib -lopengl32 -lgdi32 -lwinmm
-    target ?= $(target_name).exe
+    target ?= ./bin/$(target_name).exe
 
 else
     $(error only MSYS2 and LINUX builds are supported at the moment)
