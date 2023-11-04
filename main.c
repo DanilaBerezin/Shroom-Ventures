@@ -72,11 +72,13 @@ Platform InitPlatforms(float x,
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
-Camera2D NextCamera(Camera2D currCam,
-                    Player play,
-                    float delta,
-                    int width,
-                    int height) {
+Camera2D NextCamera(
+    Camera2D currCam,
+    Player play,
+    float delta,
+    int width,
+    int height
+) {
     Camera2D nextCam = { 0 };
     nextCam.rotation = currCam.rotation;
     nextCam.zoom = currCam.zoom;
@@ -86,9 +88,9 @@ Camera2D NextCamera(Camera2D currCam,
     const float maxDiff = 200;
     float currOffset = currCam.offset.x;
     float offsetTarget = (float) width / 2.0f;
-    if (IsKeyDown(KEY_A)){
+    if ((int) play.vel.x < 0){
         offsetTarget +=  maxDiff;
-    } else if (IsKeyDown(KEY_D)){
+    } else if ((int) play.vel.x > 0){
         offsetTarget -= maxDiff;
     } else {
         offsetTarget = currOffset;
@@ -122,15 +124,20 @@ Rectangle RectFromPlayer(Player play) {
     return playRect;
 }
 
-Player NextPlayer(Player currPlay, 
-                  Platform *mapPlat, 
-                  uint32_t numPlatforms, 
-                  float delta) {
+Player NextPlayer(
+    Player currPlay, 
+    Platform *mapPlat, 
+    uint32_t numPlatforms, 
+    float delta
+) {
     Player nextPlay = { 0 };
     nextPlay.width = currPlay.width;
 
     // Check for collisions
-    struct { Platform plat; bool willColl; } colInfo = { 0 };
+    struct { 
+        Platform plat; 
+        bool willColl; 
+    } colInfo = { 0 };
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
         
@@ -148,18 +155,30 @@ Player NextPlayer(Player currPlay,
         }
     }
     
-    // Calculate x-component of velocity
+    // Determine x-component of speed if next player won't be still
+    float xSpeed;
     if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch
                                   && colInfo.willColl) {
-        nextPlay.vel.x = PLAYER_SPRINT_SPEED;
+        xSpeed = PLAYER_SPRINT_SPEED;
     } else {
-        nextPlay.vel.x = PLAYER_HOR_SPEED;
+        xSpeed = PLAYER_HOR_SPEED;
+    }
+
+    // Calculate x-component of velocity
+    if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
+        nextPlay.vel.x = -xSpeed;
+    } else if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
+        nextPlay.vel.x = xSpeed;
+    } else if (!IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
+        nextPlay.vel.x = 0;
+    } else {
+        nextPlay.vel.x = currPlay.vel.x;
     }
 
     // Calculate y-component of velocity
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = -PLAYER_JUMP_SPEED;
-    } else if(!IsKeyDown(KEY_W) && colInfo.willColl) {
+    } else if (!IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = 0;
     } else {
         nextPlay.vel.y = currPlay.vel.y + G * delta;
@@ -167,13 +186,7 @@ Player NextPlayer(Player currPlay,
 
     // Calculate x-component of position. Coupled to x-component of velocity, so has
     // to be calucated after x-component of velocity is calculated
-    if (IsKeyDown(KEY_A)) {
-        nextPlay.pos.x = currPlay.pos.x - nextPlay.vel.x * delta;
-    } else if (IsKeyDown(KEY_D)) {
-        nextPlay.pos.x = currPlay.pos.x + nextPlay.vel.x * delta;
-    } else {
-        nextPlay.pos.x = currPlay.pos.x;
-    }
+    nextPlay.pos.x = currPlay.pos.x + nextPlay.vel.x * delta;
 
     // Calculate y-component of position. Coupled to y-component of velocity, so has
     // to be calculated after y-component of velocity is calculated
@@ -273,7 +286,7 @@ int main(void) {
         float delta = GetDeltaTime();
         play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
 
-        // Make camera track player
+        // Make camera track player, obviously coupled to the player
         camera = NextCamera(camera, play, delta, gameWidth, gameHeight);
 
         // Draw state here:
