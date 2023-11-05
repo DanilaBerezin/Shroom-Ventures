@@ -1,4 +1,6 @@
 #include "player.h"
+#include "debug.h"
+#include "macros.h"
 
 Rectangle RectFromPlayer(Player play) {
     Rectangle playRect = { 0 };

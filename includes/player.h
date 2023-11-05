@@ -3,11 +3,7 @@
 
 #include "raylib.h"
 #include "stdint.h"
-
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
+#include "debug.h"
 #include "map.h"
 
 #define MIN(a, b)                                   \
@@ -15,13 +11,6 @@
 // WARNING: macro only works for VLAs or statically declared arrays
 #define ARRAY_SIZE(arr)                             \
     (uint32_t) sizeof(arr)/sizeof(arr[0])           \
-
-// Debugging macros
-#ifdef DEBUG
-#define PRINT_FPS(x,y) DrawFPS((x), (y))
-#else 
-#define PRINT_FPS(x,y)
-#endif
 
 #define PLAYER_JUMP_SPEED 450.0f
 #define PLAYER_HOR_SPEED 200.0f

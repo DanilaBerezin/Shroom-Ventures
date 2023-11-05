@@ -1,4 +1,5 @@
 #include "map.h"
+#include "debug.h"
 
 Platform InitPlatforms(
     float x,
