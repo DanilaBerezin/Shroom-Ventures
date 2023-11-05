@@ -34,4 +34,7 @@ run: debug_target
 # some kind windows runtime (the default is wine), a linux-host, a windows-target cross
 # compiler (default is mingw-w64), and a windows-target compiled raylib.
 winrun:
-	$(MAKE) -C wintest -f winrun.mk
+	$(MAKE) -C wintest -f winrun.mk run
+
+winclean:
+	$(MAKE) -C wintest -f winrun.mk clean

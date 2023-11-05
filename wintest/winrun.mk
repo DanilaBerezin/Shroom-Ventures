@@ -9,9 +9,9 @@ CFLAGS += -L$(RAYLIB_WIN_PWD)
 CFLAGS += -I$(RAYLIB_HEADERS)
 CFLAGS += -I../includes
 CFLAGS += -O2
-cfiles := $(wildcard ../*.c)
-objs := $(patsubst ../%.c, %.o, $(cfiles))
-.PHONY: run
+cfiles := $(wildcard ../src/*.c)
+objs := $(patsubst ../src/%.c, %.o, $(cfiles))
+.PHONY: run clean
 
 run: $(target)
 	-@wine $(target)
@@ -19,7 +19,8 @@ run: $(target)
 $(target): $(objs)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-%.o: ../%.c
+%.o: ../src/%.c
 	$(CC) $(CFLAGS) -c $<
 
-
+clean:
+	-@rm -f $(target) $(objs)
