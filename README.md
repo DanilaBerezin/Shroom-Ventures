@@ -6,12 +6,15 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 2) ~~Create config.mk that also supports compiling on msys~~
 3) ~~Finish character movement control (sprint, crouch etc)~~
 4) Figure out a pause screen
-5) Create a startup menu
-6) Figure out animations
-7) Figure out basic ai
-8) Create a map loader
-9) ~~Reinstall raylib and link against archive instead of shared library~~
-10) ~~Make makefile configurable and not dependent on my setup~~
+5) Figure out a static background
+6) Figure out a "ground" instead of just having a "platform"
+7) Figure out basic map file format
+8) Load a map
+9) Create a startup menu
+10) Figure out animations
+11) Figure out basic ai
+12) ~~Reinstall raylib and link against archive instead of shared library~~
+13) ~~Make makefile configurable and not dependent on my setup~~
 
 ## Build instructions
 Currently, I support building on MSYS2 with the mingw64 environment on Windows, and natively on linux. This project does depend on **Raylib** which is a beautiful project and you should please take a moment to [check them out](https://github.com/raysan5/raylib/). Before building Shroom Ventures from source, follow the instructions on Raylibs github repo to build and install the Raylib library on your system.
