@@ -42,18 +42,37 @@ Player NextPlayer(
             break;
         }
     }
-    
-    // Determine x-component of speed if next player won't be still
+
+    // Dash state logic
+    if (currPlay.isDash && currPlay.dashTime + delta > MAX_DASH_TIME) {
+        nextPlay.isDash = false;
+        nextPlay.dashTime = 0.0f;
+    } else if (!currPlay.isDash && IsKeyDown(KEY_LEFT_SHIFT)
+                                && currPlay.walkTime > DASH_COOL_DOWN_TIME) {
+        nextPlay.isDash = true;
+        nextPlay.dashTime = currPlay.dashTime;
+    } else if (currPlay.isDash) {
+        nextPlay.isDash = currPlay.isDash;
+        nextPlay.dashTime = currPlay.dashTime + delta;
+    } else {
+        nextPlay.isDash = currPlay.isDash;
+        nextPlay.dashTime = currPlay.dashTime;
+    }
+
+    // Determine x-component of speed
     float xSpeed;
-    if (IsKeyDown(KEY_LEFT_SHIFT) && !currPlay.isCrouch
-                                  && colInfo.willColl) {
+    if (nextPlay.isDash && !currPlay.isCrouch) {
+        nextPlay.walkTime = 0.0f;
         xSpeed = PLAYER_SPRINT_SPEED;
     } else {
         xSpeed = PLAYER_HOR_SPEED;
+        nextPlay.walkTime = currPlay.walkTime + delta;
     }
 
-    // Calculate x-component of velocity
-    if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
+    // Calculate x-component of velocity, coupled with dash state logic
+    if (nextPlay.isDash && currPlay.isDash) {
+        nextPlay.vel.x = currPlay.vel.x;
+    } else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
         nextPlay.vel.x = -xSpeed;
     } else if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
         nextPlay.vel.x = xSpeed;
@@ -72,13 +91,14 @@ Player NextPlayer(
         nextPlay.vel.y = currPlay.vel.y + G * delta;
     }
 
-    // Calculate x-component of position. Coupled to x-component of velocity, so has
-    // to be calucated after x-component of velocity is calculated
+    // Calculate x-component of position. Coupled to x-component of velocity
     nextPlay.pos.x = currPlay.pos.x + nextPlay.vel.x * delta;
 
-    // Calculate y-component of position. Coupled to y-component of velocity, so has
-    // to be calculated after y-component of velocity is calculated
-    if (colInfo.willColl) {
+    // Calculate y-component of position. Coupled to y-component of velocity and dash
+    // logic
+    if (nextPlay.isDash) {
+        nextPlay.pos.y = currPlay.pos.y;
+    } else if (colInfo.willColl) {
         Platform colPlat = colInfo.plat;
         nextPlay.pos.y = colPlat.rect.y - currPlay.height;
     } else {

@@ -119,6 +119,8 @@ int main(void) {
     play.height = PLAYER_DEFAULT_HEIGHT;
     play.vel.y = 0.0f;
     play.isCrouch = false;
+    play.isDash = false;
+    play.dashTime = 0.0f;
 
     // Camera
     Camera2D camera = { 0 };

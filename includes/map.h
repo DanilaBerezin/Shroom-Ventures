@@ -5,7 +5,9 @@
 #include "raylib.h"
 
 #define MAX_BUILDINGS 100
-#define G 800
+#define G 900
+
+//TESSSTTT
 
 typedef struct {
     Rectangle   rect;
