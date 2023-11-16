@@ -25,6 +25,7 @@ Player NextPlayer(
         Platform plat; 
         bool willColl; 
     } colInfo = { 0 };
+
     for (uint32_t i = 0; i < numPlatforms; i++) {
         Platform plat = mapPlat[i];
         

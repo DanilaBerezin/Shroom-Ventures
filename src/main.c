@@ -2,25 +2,10 @@
 #include "raymath.h"
 #include <stdint.h>
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
 #include "player.h"
 #include "map.h"
-
-#define MIN(a, b)                                   \
-    ((a) < (b) ? (a) : (b))                         \
-// WARNING: macro only works for VLAs or statically declared arrays
-#define ARRAY_SIZE(arr)                             \
-    (uint32_t) sizeof(arr)/sizeof(arr[0])           \
-
-// Debugging macros
-#ifdef DEBUG
-    #define PRINT_FPS(x,y) DrawFPS((x), (y))
-#else 
-    #define PRINT_FPS(x,y)
-#endif
+#include "macros.h"
+#include "debug.h"
 
 // Functions
 float GetDeltaTime(void) {
@@ -60,6 +45,7 @@ Camera2D NextCamera(
     } else {
         offsetTarget = currOffset;
     }
+
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
     nextCam.offset.x = currOffset + offSpeed * delta; 
     nextCam.offset.y = currCam.offset.y;
@@ -69,6 +55,7 @@ Camera2D NextCamera(
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
     Vector2 diff = Vector2Subtract(play.pos, currCam.target);
+
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
         float speed = fmaxf(fractionSpeed * length, minSpeed);
@@ -81,23 +68,22 @@ Camera2D NextCamera(
 }
 
 int main(void) {
-    // Initializing env
-    // Application stuff 
+    // Initializing application stuff 
     const int windowWidth = 800;
     const int windowHeight = 450;
     const int gameWidth = 1600;
     const int gameHeight = 900;
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT); // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(800, 450);
-    SetExitKey(KEY_NULL);                                    // Disables the default behavior of closing window on ESC key
+    SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on ESC key
     SetTargetFPS(60);
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(gameWidth, gameHeight);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
     
-    // Game objects
     // Map platforms
     Platform mapPlat[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
                            InitPlatforms(650, 200, 100, 10, true, GRAY),
@@ -147,62 +133,55 @@ int main(void) {
     // Main game loop
     while (!WindowShouldClose()){
         // Update state here:
-        // Move player
         float delta = GetDeltaTime();
         play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
-
-        // Make camera track player, obviously coupled to the player
         camera = NextCamera(camera, play, delta, gameWidth, gameHeight);
 
-        // Draw state here:
+        // Side effects of state go here:
         BeginTextureMode(rendTarg);
-            ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
             
-            // Draw stuff in camera coordinates here
-            BeginMode2D(camera);
-                // Background buildings
-                for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
-                    DrawRectangleRec(builds[i], buildCol[i]);
-                }
-                
-                // Platforms
-                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlat); i++) {
-                    DrawRectangleRec(mapPlat[i].rect, mapPlat[i].color);
-                }
-                
-                // Player
-                DrawRectangleRec(RectFromPlayer(play), RED); 
-            EndMode2D();
+        // Draw stuff in camera coordinates in mode2D block 
+        BeginMode2D(camera);
+        for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
+            DrawRectangleRec(builds[i], buildCol[i]);
+        }
+        
+        for (uint32_t i = 0; i < ARRAY_SIZE(mapPlat); i++) {
+            DrawRectangleRec(mapPlat[i].rect, mapPlat[i].color);
+        }
+        
+        DrawRectangleRec(RectFromPlayer(play), RED); 
+        EndMode2D();
 
-            DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
-
+        DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
         EndTextureMode();
 
         // This will draw the texture
         BeginDrawing();
-            ClearBackground(BLACK);
+        ClearBackground(BLACK);
 
-            float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
-                              (float) GetScreenHeight() / (float) gameHeight);
+        float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
+                          (float) GetScreenHeight() / (float) gameHeight);
 
-            Rectangle src = { 0 };
-            src.width = rendTarg.texture.width;
-            src.height = -rendTarg.texture.height;
+        Rectangle src = { 0 };
+        src.width = rendTarg.texture.width;
+        src.height = -rendTarg.texture.height;
 
-            // This destination rect will scale the screen while keeping it centered
-            Rectangle dest = { 0 };
-            dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
-            dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
-            dest.width = gameWidth * scale;
-            dest.height = gameHeight * scale;
+        // This destination rect will scale the screen while keeping it centered
+        Rectangle dest = { 0 };
+        dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
+        dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
+        dest.width = gameWidth * scale;
+        dest.height = gameHeight * scale;
 
-            Vector2 offset = { 0 };
-            offset.x = 0.0f;
-            offset.y = 0.0f;
+        Vector2 offset = { 0 };
+        offset.x = 0.0f;
+        offset.y = 0.0f;
 
-            DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
+        DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
 
-            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
+        PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
         EndDrawing();
     }
 

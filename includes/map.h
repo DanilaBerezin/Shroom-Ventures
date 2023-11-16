@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 #include "raylib.h"
-#include "debug.h"
-#include "macros.h"
 
 #define MAX_BUILDINGS 100
 #define G 800
