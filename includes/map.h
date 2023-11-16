@@ -5,7 +5,7 @@
 #include "raylib.h"
 
 #define MAX_BUILDINGS 100
-#define G 900
+#define G 1000
 
 //TESSSTTT
 

@@ -85,7 +85,8 @@ Player NextPlayer(
     // Calculate y-component of velocity
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = -PLAYER_JUMP_SPEED;
-    } else if (!IsKeyDown(KEY_W) && colInfo.willColl) {
+    } else if ((!IsKeyDown(KEY_W) && colInfo.willColl)
+                                 || nextPlay.isDash) {
         nextPlay.vel.y = 0;
     } else {
         nextPlay.vel.y = currPlay.vel.y + G * delta;
@@ -94,11 +95,8 @@ Player NextPlayer(
     // Calculate x-component of position. Coupled to x-component of velocity
     nextPlay.pos.x = currPlay.pos.x + nextPlay.vel.x * delta;
 
-    // Calculate y-component of position. Coupled to y-component of velocity and dash
-    // logic
-    if (nextPlay.isDash) {
-        nextPlay.pos.y = currPlay.pos.y;
-    } else if (colInfo.willColl) {
+    // Calculate y-component of position. Coupled to y-component of velocity. 
+    if (colInfo.willColl) {
         Platform colPlat = colInfo.plat;
         nextPlay.pos.y = colPlat.rect.y - currPlay.height;
     } else {

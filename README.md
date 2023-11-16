@@ -5,7 +5,7 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 1) ~~First finish camera~~
 2) ~~Create config.mk that also supports compiling on msys~~
 3) ~~Finish character movement control (sprint, crouch etc)~~
-4) Implement a dash mechanic instead of a sprint mechanic
+4) ~~Implement a dash mechanic instead of a sprint mechanic~~
 5) Figure out a pause screen
 6) Figure out a static background
 7) Figure out a "ground" instead of just having a "platform"
