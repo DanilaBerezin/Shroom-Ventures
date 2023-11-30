@@ -7,13 +7,15 @@
 #include "macros.h"
 #include "debug.h"
 
+#define DELTA_TIME (1.0f / 60.0f)
+
+#ifdef DEBUG
+    #define GetFrameTime() DELTA_TIME;
+#endif
+
 // Functions
 float GetDeltaTime(void) {
-#ifdef DEBUG
-    return 1.0f / 60.0f;
-#else
-    return GetFrameTime();
-#endif
+    return DELTA_TIME;
 }
 
 // NOTE: for some reason the smoothing here ends up resulting in a 
@@ -132,14 +134,25 @@ int main(void) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
+    // Timing stuff
+    float accTime = 0;
+    float delta;
+    float frameTime;
+
     // Main game loop
     while (!WindowShouldClose()){
-        // Update state here:
-        float delta = GetDeltaTime();
-        play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
-        camera = NextCamera(camera, play, delta, gameWidth, gameHeight);
+        // Fixed time step implementation, doesn't handle death-spiral case
+        delta = GetDeltaTime();
+        frameTime = GetDeltaTime();
+        accTime += frameTime;
+        while (accTime > delta){
+            // Update state here:
+            play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
+            camera = NextCamera(camera, play, delta, gameWidth, gameHeight);
+            accTime -= delta;
+        }
 
-        // Side effects of state go here:
+        // Side effects of state in textureMode block
         BeginTextureMode(rendTarg);
         ClearBackground(RAYWHITE);
             
@@ -159,7 +172,7 @@ int main(void) {
         DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
         EndTextureMode();
 
-        // This will draw the texture
+        // This block will draw the texture
         BeginDrawing();
         ClearBackground(BLACK);
 

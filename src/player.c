@@ -82,11 +82,11 @@ Player NextPlayer(
         nextPlay.vel.x = currPlay.vel.x;
     }
 
-    // Calculate y-component of velocity
+    // Calculate y-component of velocity, coupled with dash state logic as well
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = -PLAYER_JUMP_SPEED;
     } else if ((!IsKeyDown(KEY_W) && colInfo.willColl)
-                                 || nextPlay.isDash) {
+                                  || nextPlay.isDash) {
         nextPlay.vel.y = 0;
     } else {
         nextPlay.vel.y = currPlay.vel.y + G * delta;

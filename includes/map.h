@@ -7,8 +7,6 @@
 #define MAX_BUILDINGS 100
 #define G 1000
 
-//TESSSTTT
-
 typedef struct {
     Rectangle   rect;
     bool        block;
