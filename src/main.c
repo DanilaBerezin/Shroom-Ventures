@@ -79,10 +79,12 @@ int main(void) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(800, 450);
-    SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on ESC key
+    SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
+                                                                // ESC key
     SetTargetFPS(60);
 
-    // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and maintaining aspect ratio
+    // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
+    // maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(gameWidth, gameHeight);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
     
