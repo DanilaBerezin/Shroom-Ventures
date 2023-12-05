@@ -4,8 +4,8 @@
 
 #include "player.h"
 #include "map.h"
+#include "state.h"
 #include "macros.h"
-#include "debug.h"
 
 #define DELTA_TIME (1.0f / 60.0f)
 
@@ -89,7 +89,7 @@ int main(void) {
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
     
     // Map platforms
-    Platform mapPlat[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
+    Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
                            InitPlatforms(650, 200, 100, 10, true, GRAY),
                            InitPlatforms(250, 200, 100, 10, true, GRAY),
                            InitPlatforms(300, 100, 400, 10, true, GRAY), };
@@ -97,7 +97,7 @@ int main(void) {
     // Background buildings 
     Rectangle builds[MAX_BUILDINGS];
     Color buildCol[MAX_BUILDINGS];
-    Platform gnd = mapPlat[0];
+    Platform gnd = mapPlats[0];
     uint32_t spacing = 0;
     for (uint32_t i = 0; i < MAX_BUILDINGS; i++){
         float width = GetRandomValue(50,200);
@@ -136,69 +136,73 @@ int main(void) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    // Timing stuff
-    float accTime = 0;
-    float delta;
-    float frameTime;
+    // Setting the state
+    WorldState state = { 0 };
+    state.numPlats = ARRAY_SIZE(mapPlats);
+    state.mapPlats = mapPlats;
+    state.play = play;
+    state.camera = camera;
 
     // Main game loop
+    float frameTime;
+    float accTime = 0;
     while (!WindowShouldClose()){
         // Fixed time step implementation, doesn't handle death-spiral case
-        delta = GetDeltaTime();
-        frameTime = GetDeltaTime();
+        state.delta = GetDeltaTime();
+        frameTime = GetFrameTime();
         accTime += frameTime;
-        while (accTime > delta){
+        while (accTime > state.delta){
             // Update state here:
-            play = NextPlayer(play, mapPlat, ARRAY_SIZE(mapPlat), delta);
-            camera = NextCamera(camera, play, delta, gameWidth, gameHeight);
-            accTime -= delta;
+            play = NextPlayer(play, mapPlats, ARRAY_SIZE(mapPlats), state.delta);
+            camera = NextCamera(camera, play, state.delta, gameWidth, gameHeight);
+            accTime -= state.delta;
         }
 
         // Side effects of state in textureMode block
         BeginTextureMode(rendTarg);
-        ClearBackground(RAYWHITE);
-            
-        // Draw stuff in camera coordinates in mode2D block 
-        BeginMode2D(camera);
-        for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
-            DrawRectangleRec(builds[i], buildCol[i]);
-        }
-        
-        for (uint32_t i = 0; i < ARRAY_SIZE(mapPlat); i++) {
-            DrawRectangleRec(mapPlat[i].rect, mapPlat[i].color);
-        }
-        
-        DrawRectangleRec(RectFromPlayer(play), RED); 
-        EndMode2D();
+            ClearBackground(RAYWHITE);
+                
+            // Draw stuff in camera coordinates in mode2D block 
+            BeginMode2D(camera);
+                for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
+                    DrawRectangleRec(builds[i], buildCol[i]);
+                }
+                
+                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlats); i++) {
+                    DrawRectangleRec(mapPlats[i].rect, mapPlats[i].color);
+                }
+                
+                DrawRectangleRec(RectFromPlayer(play), RED); 
+            EndMode2D();
 
-        DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
+            DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
         EndTextureMode();
 
         // This block will draw the texture
         BeginDrawing();
-        ClearBackground(BLACK);
+            ClearBackground(BLACK);
 
-        float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
-                          (float) GetScreenHeight() / (float) gameHeight);
+            float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
+                              (float) GetScreenHeight() / (float) gameHeight);
 
-        Rectangle src = { 0 };
-        src.width = rendTarg.texture.width;
-        src.height = -rendTarg.texture.height;
+            Rectangle src = { 0 };
+            src.width = rendTarg.texture.width;
+            src.height = -rendTarg.texture.height;
 
-        // This destination rect will scale the screen while keeping it centered
-        Rectangle dest = { 0 };
-        dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
-        dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
-        dest.width = gameWidth * scale;
-        dest.height = gameHeight * scale;
+            // This destination rect will scale the screen while keeping it centered
+            Rectangle dest = { 0 };
+            dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
+            dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
+            dest.width = gameWidth * scale;
+            dest.height = gameHeight * scale;
 
-        Vector2 offset = { 0 };
-        offset.x = 0.0f;
-        offset.y = 0.0f;
+            Vector2 offset = { 0 };
+            offset.x = 0.0f;
+            offset.y = 0.0f;
 
-        DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
+            DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
 
-        PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
+            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
         EndDrawing();
     }
 
