@@ -5,6 +5,7 @@
 #include "player.h"
 #include "map.h"
 #include "state.h"
+#include "debug.h"
 #include "macros.h"
 
 #define DELTA_TIME (1.0f / 60.0f)
@@ -14,9 +15,6 @@
 #endif
 
 // Functions
-float GetDeltaTime(void) {
-    return DELTA_TIME;
-}
 
 // NOTE: for some reason the smoothing here ends up resulting in a 
 // sort of course grain appearance. Probably something internal to
@@ -24,46 +22,40 @@ float GetDeltaTime(void) {
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
-Camera2D NextCamera(
-    Camera2D currCam,
-    Player play,
-    float delta,
-    int width,
-    int height
-) {
+Camera2D NextCamera(State currSt, int gameWidth) {
     Camera2D nextCam = { 0 };
-    nextCam.rotation = currCam.rotation;
-    nextCam.zoom = currCam.zoom;
+    nextCam.rotation = currSt.camera.rotation;
+    nextCam.zoom = currSt.camera.zoom;
 
     // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 1.5f;
     const float maxDiff = 200;
-    float currOffset = currCam.offset.x;
-    float offsetTarget = (float) width / 2.0f;
-    if ((int) play.vel.x < 0){
+    float currOffset = currSt.camera.offset.x;
+    float offsetTarget = (float) gameWidth / 2.0f;
+    if ((int) currSt.player.vel.x < 0){
         offsetTarget +=  maxDiff;
-    } else if ((int) play.vel.x > 0){
+    } else if ((int) currSt.player.vel.x > 0){
         offsetTarget -= maxDiff;
     } else {
         offsetTarget = currOffset;
     }
 
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * delta; 
-    nextCam.offset.y = currCam.offset.y;
+    nextCam.offset.x = currOffset + offSpeed * currSt.delta; 
+    nextCam.offset.y = currSt.camera.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    Vector2 diff = Vector2Subtract(play.pos, currCam.target);
+    Vector2 diff = Vector2Subtract(currSt.player.pos, currSt.camera.target);
 
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
         float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(currCam.target, Vector2Scale(diff, speed * delta / length));
+        nextCam.target = Vector2Add(currSt.camera.target, Vector2Scale(diff, speed * currSt.delta / length));
     } else {
-       nextCam.target = currCam.target;
+       nextCam.target = currSt.camera.target;
     }
 
     return nextCam;
@@ -127,35 +119,33 @@ int main(void) {
     play.dashTime = 0.0f;
 
     // Camera
-    Camera2D camera = { 0 };
-    camera.target = play.pos;
+    Camera2D cam = { 0 };
+    cam.target = play.pos;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
-    camera.offset.x = (float) gameWidth / 2.0f;
-    camera.offset.y = (float) gameHeight / 2.0f;
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
+    cam.offset.x = (float) gameWidth / 2.0f;
+    cam.offset.y = (float) gameHeight / 2.0f;
+    cam.rotation = 0.0f;
+    cam.zoom = 1.0f;
 
     // Setting the state
-    WorldState state = { 0 };
-    state.numPlats = ARRAY_SIZE(mapPlats);
-    state.mapPlats = mapPlats;
-    state.play = play;
-    state.camera = camera;
+    State st = { .delta = DELTA_TIME };
+    st.numPlats = ARRAY_SIZE(mapPlats);
+    st.mapPlats = mapPlats;
+    st.player = play;
+    st.camera = cam;
 
     // Main game loop
-    float frameTime;
     float accTime = 0;
     while (!WindowShouldClose()){
         // Fixed time step implementation, doesn't handle death-spiral case
-        state.delta = GetDeltaTime();
-        frameTime = GetFrameTime();
-        accTime += frameTime;
-        while (accTime > state.delta){
+        st.frameTime = GetFrameTime();
+        accTime += st.frameTime;
+        while (accTime > st.delta){
             // Update state here:
-            play = NextPlayer(play, mapPlats, ARRAY_SIZE(mapPlats), state.delta);
-            camera = NextCamera(camera, play, state.delta, gameWidth, gameHeight);
-            accTime -= state.delta;
+            st.player = NextPlayer(st);
+            st.camera = NextCamera(st, gameWidth);
+            accTime -= st.delta;
         }
 
         // Side effects of state in textureMode block
@@ -163,16 +153,16 @@ int main(void) {
             ClearBackground(RAYWHITE);
                 
             // Draw stuff in camera coordinates in mode2D block 
-            BeginMode2D(camera);
+            BeginMode2D(st.camera);
                 for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
                     DrawRectangleRec(builds[i], buildCol[i]);
                 }
                 
                 for (uint32_t i = 0; i < ARRAY_SIZE(mapPlats); i++) {
-                    DrawRectangleRec(mapPlats[i].rect, mapPlats[i].color);
+                    DrawRectangleRec(st.mapPlats[i].rect, st.mapPlats[i].color);
                 }
                 
-                DrawRectangleRec(RectFromPlayer(play), RED); 
+                DrawRectangleRec(RectFromPlayer(st.player), RED); 
             EndMode2D();
 
             DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);

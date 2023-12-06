@@ -1,8 +1,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <stdint.h>
 #include "raylib.h"
-#include "stdint.h"
+#include "state.h"
 #include "map.h"
 
 // In pixels per second
@@ -17,27 +18,22 @@
 #define MAX_DASH_TIME 0.15f
 #define DASH_COOL_DOWN_TIME 1.0f
 
-typedef struct {
+typedef struct player {
     // Physics
-    Vector2     pos;
-    Vector2     vel;
-    float       width;
-    float       height;
+    Vector2 pos;
+    Vector2 vel;
+    float width;
+    float height;
 
     // Movement state
-    bool        isCrouch;
-    bool        isDash;
-    float       dashTime;
-    float       walkTime;
+    bool isCrouch;
+    bool isDash;
+    float dashTime;
+    float walkTime;
 } Player;
 
 Rectangle RectFromPlayer(Player play);
 
-Player NextPlayer(
-    Player currPlay, 
-    Platform *mapPlat, 
-    uint32_t numPlatforms, 
-    float delta
-);
+Player NextPlayer(State st);
 
 #endif

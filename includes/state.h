@@ -1,27 +1,31 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include "raylib.h"
 #include <stdint.h>
-
+#include "raylib.h"
 #include "player.h"
 #include "map.h"
-#include "debug.h"
-
-#define DELTA_TIME (1.0f / 60.0f)
 
 typedef struct {
-    float delta;
-    uint32_t numPlats;
-    Platform *mapPlats;
-    Player play;
-    Camera2D camera;
-} WorldState;
+    // System state
+    struct {
+        const float delta;
+        float frameTime;
+    };
 
-void UpdateDeltaTime(WorldState *state);
+    // World state
+    struct {
+        uint32_t numPlats;
+        Platform *mapPlats;
+        Player player;
+        Camera2D camera;
+    };
+} State;
 
-void UpdateState(WorldState *state);
+State UpdateSystem(State st);
 
-void DrawState(WorldState *state);
+State UpdateWorld(State st);
+
+void DrawWorld(State st);
 
 #endif
