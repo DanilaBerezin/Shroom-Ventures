@@ -22,40 +22,40 @@
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
-Camera2D NextCamera(State currSt, int gameWidth) {
+static Camera2D NextCamera(State *st, int gameWidth) {
     Camera2D nextCam = { 0 };
-    nextCam.rotation = currSt.camera.rotation;
-    nextCam.zoom = currSt.camera.zoom;
+    nextCam.rotation = st->camera.rotation;
+    nextCam.zoom = st->camera.zoom;
 
     // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 1.5f;
     const float maxDiff = 200;
-    float currOffset = currSt.camera.offset.x;
+    float currOffset = st->camera.offset.x;
     float offsetTarget = (float) gameWidth / 2.0f;
-    if ((int) currSt.player.vel.x < 0){
+    if ((int) st->player.vel.x < 0){
         offsetTarget +=  maxDiff;
-    } else if ((int) currSt.player.vel.x > 0){
+    } else if ((int) st->player.vel.x > 0){
         offsetTarget -= maxDiff;
     } else {
         offsetTarget = currOffset;
     }
 
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * currSt.delta; 
-    nextCam.offset.y = currSt.camera.offset.y;
+    nextCam.offset.x = currOffset + offSpeed * st->delta; 
+    nextCam.offset.y = st->camera.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    Vector2 diff = Vector2Subtract(currSt.player.pos, currSt.camera.target);
+    Vector2 diff = Vector2Subtract(st->player.pos, st->camera.target);
 
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
         float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(currSt.camera.target, Vector2Scale(diff, speed * currSt.delta / length));
+        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(diff, speed * st->delta / length));
     } else {
-       nextCam.target = currSt.camera.target;
+       nextCam.target = st->camera.target;
     }
 
     return nextCam;
@@ -143,8 +143,8 @@ int main(void) {
         accTime += st.frameTime;
         while (accTime > st.delta){
             // Update state here:
-            st.player = NextPlayer(st);
-            st.camera = NextCamera(st, gameWidth);
+            st.player = NextPlayer(&st);
+            st.camera = NextCamera(&st, gameWidth);
             accTime -= st.delta;
         }
 
@@ -162,7 +162,7 @@ int main(void) {
                     DrawRectangleRec(st.mapPlats[i].rect, st.mapPlats[i].color);
                 }
                 
-                DrawRectangleRec(RectFromPlayer(st.player), RED); 
+                DrawRectangleRec(HitBox(&st.player), RED); 
             EndMode2D();
 
             DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);

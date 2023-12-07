@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 #include "raylib.h"
-#include "state.h"
-#include "map.h"
 
 // In pixels per second
 #define PLAYER_JUMP_SPEED 500.0f
@@ -18,22 +16,25 @@
 #define MAX_DASH_TIME 0.15f
 #define DASH_COOL_DOWN_TIME 1.0f
 
+// Typedef to avoid circular dependency between state.h and player.h
+typedef struct state State;
+
 typedef struct player {
     // Physics
     Vector2 pos;
     Vector2 vel;
-    float width;
-    float height;
+    float   width;
+    float   height;
 
     // Movement state
-    bool isCrouch;
-    bool isDash;
-    float dashTime;
-    float walkTime;
+    bool    isCrouch;
+    bool    isDash;
+    float   dashTime;
+    float   walkTime;
 } Player;
 
-Rectangle RectFromPlayer(Player play);
+Rectangle HitBox(Player *play);
 
-Player NextPlayer(State st);
+Player NextPlayer(State *st);
 
 #endif
