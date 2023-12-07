@@ -1,7 +1,6 @@
+#include <stdint.h>
 #include "raylib.h"
 #include "raymath.h"
-#include <stdint.h>
-
 #include "player.h"
 #include "map.h"
 #include "state.h"
@@ -139,12 +138,11 @@ int main(void) {
     float accTime = 0;
     while (!WindowShouldClose()){
         // Fixed time step implementation, doesn't handle death-spiral case
-        st.frameTime = GetFrameTime();
+        st = NextSystemState(&st);
         accTime += st.frameTime;
         while (accTime > st.delta){
             // Update state here:
-            st.player = NextPlayer(&st);
-            st.camera = NextCamera(&st, gameWidth);
+            st = NextWorldState(&st, gameWidth);
             accTime -= st.delta;
         }
 

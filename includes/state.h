@@ -18,10 +18,10 @@ typedef struct state {
     Camera2D        camera;
 } State;
 
-State UpdateSystem(State *st);
+State NextSystemState(State *st);
 
-State UpdateWorld(State *st);
+State NextWorldState(State *st, int gameWidth);
 
-void DrawWorld(State *st);
+void DrawWorldState(State *st);
 
 #endif
