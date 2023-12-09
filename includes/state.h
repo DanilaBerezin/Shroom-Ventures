@@ -8,12 +8,14 @@
 
 typedef struct state {
     // System state
-    const float     delta;
     float           frameTime;
 
     // World state
     uint32_t        numPlats;
     Platform        *mapPlats;
+    uint32_t        numBuilds;
+    Rectangle       *builds;
+    Color           *buildCols;
     Player          player;
     Camera2D        camera;
 } State;
@@ -22,6 +24,6 @@ State NextSystemState(State *st);
 
 State NextWorldState(State *st, int gameWidth);
 
-void DrawWorldState(State *st);
+void DrawWorldState(State *st, RenderTexture2D, int gameWidth, int gameHeight);
 
 #endif

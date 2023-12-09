@@ -1,5 +1,7 @@
 #include "state.h"
 #include "raymath.h"
+#include "debug.h"
+#include "macros.h"
 
 State NextSystemState(State *st) {
     State nextSys = *st;
@@ -32,7 +34,7 @@ static Camera2D NextCamera(State *st, int gameWidth) {
     }
 
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * st->delta; 
+    nextCam.offset.x = currOffset + offSpeed * DELTA_TIME; 
     nextCam.offset.y = st->camera.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
@@ -44,7 +46,7 @@ static Camera2D NextCamera(State *st, int gameWidth) {
     float length = Vector2Length(diff);
     if (length > minEffectLength) {
         float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(diff, speed * st->delta / length));
+        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(diff, speed * DELTA_TIME / length));
     } else {
        nextCam.target = st->camera.target;
     }
@@ -59,6 +61,50 @@ State NextWorldState(State *st, int gameWidth) {
     return nextWorld;
 }
 
-void DrawWorldState(State *st) {
-    return;
+void DrawWorldState(State *st, RenderTexture2D rendTarg, int gameWidth, int gameHeight) {
+	BeginTextureMode(rendTarg);
+        ClearBackground(RAYWHITE);
+            
+        // Draw stuff in camera coordinates in mode2D block 
+        BeginMode2D(st->camera);
+            for (uint32_t i = 0; i < st->numBuilds; i++) {
+                DrawRectangleRec(st->builds[i], st->buildCols[i]);
+            }
+            
+            for (uint32_t i = 0; i < st->numPlats; i++) {
+                DrawRectangleRec(st->mapPlats[i].rect, st->mapPlats[i].color);
+            }
+            
+            DrawRectangleRec(HitBox(&st->player), RED); 
+        EndMode2D();
+
+        DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
+    EndTextureMode();
+
+    // This block will draw the texture
+    BeginDrawing();
+        ClearBackground(BLACK);
+
+        float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
+                          (float) GetScreenHeight() / (float) gameHeight);
+
+        Rectangle src = { 0 };
+        src.width = rendTarg.texture.width;
+        src.height = -rendTarg.texture.height;
+
+        // This destination rect will scale the screen while keeping it centered
+        Rectangle dest = { 0 };
+        dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
+        dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
+        dest.width = gameWidth * scale;
+        dest.height = gameHeight * scale;
+
+        Vector2 offset = { 0 };
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+
+        DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
+
+        PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
+    EndDrawing();
 }

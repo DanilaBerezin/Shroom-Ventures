@@ -7,58 +7,9 @@
 #include "debug.h"
 #include "macros.h"
 
-#define DELTA_TIME (1.0f / 60.0f)
-
 #ifdef DEBUG
     #define GetFrameTime() DELTA_TIME;
 #endif
-
-// Functions
-
-// NOTE: for some reason the smoothing here ends up resulting in a 
-// sort of course grain appearance. Probably something internal to
-// raylib though the devs deny it lol. Funnily enough casting the 
-// values to ints makes it look a bit smoother imo and rounding
-// doesn't seem to make a difference? Oh well I'll tinker with this
-// later
-static Camera2D NextCamera(State *st, int gameWidth) {
-    Camera2D nextCam = { 0 };
-    nextCam.rotation = st->camera.rotation;
-    nextCam.zoom = st->camera.zoom;
-
-    // PID smoothing for camera motion when you move left or right
-    const float offsetCoeff = 1.5f;
-    const float maxDiff = 200;
-    float currOffset = st->camera.offset.x;
-    float offsetTarget = (float) gameWidth / 2.0f;
-    if ((int) st->player.vel.x < 0){
-        offsetTarget +=  maxDiff;
-    } else if ((int) st->player.vel.x > 0){
-        offsetTarget -= maxDiff;
-    } else {
-        offsetTarget = currOffset;
-    }
-
-    float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * st->delta; 
-    nextCam.offset.y = st->camera.offset.y;
-    
-    // Smoothing for currCam to follow target (player in this case)
-    const float minSpeed = 110;
-    const float minEffectLength = 10;
-    const float fractionSpeed = 3.5f;
-    Vector2 diff = Vector2Subtract(st->player.pos, st->camera.target);
-
-    float length = Vector2Length(diff);
-    if (length > minEffectLength) {
-        float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(diff, speed * st->delta / length));
-    } else {
-       nextCam.target = st->camera.target;
-    }
-
-    return nextCam;
-}
 
 int main(void) {
     // Initializing application stuff 
@@ -87,7 +38,7 @@ int main(void) {
 
     // Background buildings 
     Rectangle builds[MAX_BUILDINGS];
-    Color buildCol[MAX_BUILDINGS];
+    Color buildCols[MAX_BUILDINGS];
     Platform gnd = mapPlats[0];
     uint32_t spacing = 0;
     for (uint32_t i = 0; i < MAX_BUILDINGS; i++){
@@ -98,10 +49,10 @@ int main(void) {
         builds[i].y = gameHeight - (gameHeight - gnd.rect.y) - height;
         builds[i].x = gnd.rect.x + spacing;
 
-        buildCol[i].r = GetRandomValue(200,240);
-        buildCol[i].g = GetRandomValue(200,240);
-        buildCol[i].b = GetRandomValue(200,250);
-        buildCol[i].a = 255;
+        buildCols[i].r = GetRandomValue(200,240);
+        buildCols[i].g = GetRandomValue(200,240);
+        buildCols[i].b = GetRandomValue(200,250);
+        buildCols[i].a = 255;
         
         spacing += (uint32_t) builds[i].width;
     }
@@ -128,9 +79,12 @@ int main(void) {
     cam.zoom = 1.0f;
 
     // Setting the state
-    State st = { .delta = DELTA_TIME };
+    State st = { 0 };
     st.numPlats = ARRAY_SIZE(mapPlats);
     st.mapPlats = mapPlats;
+    st.numBuilds = MAX_BUILDINGS;
+    st.builds = builds;
+    st.buildCols = buildCols;
     st.player = play;
     st.camera = cam;
 
@@ -140,58 +94,14 @@ int main(void) {
         // Fixed time step implementation, doesn't handle death-spiral case
         st = NextSystemState(&st);
         accTime += st.frameTime;
-        while (accTime > st.delta){
+        while (accTime > DELTA_TIME){
             // Update state here:
             st = NextWorldState(&st, gameWidth);
-            accTime -= st.delta;
+            accTime -= DELTA_TIME;
         }
 
-        // Side effects of state in textureMode block
-        BeginTextureMode(rendTarg);
-            ClearBackground(RAYWHITE);
-                
-            // Draw stuff in camera coordinates in mode2D block 
-            BeginMode2D(st.camera);
-                for (uint32_t i = 0; i < MAX_BUILDINGS; i++) {
-                    DrawRectangleRec(builds[i], buildCol[i]);
-                }
-                
-                for (uint32_t i = 0; i < ARRAY_SIZE(mapPlats); i++) {
-                    DrawRectangleRec(st.mapPlats[i].rect, st.mapPlats[i].color);
-                }
-                
-                DrawRectangleRec(HitBox(&st.player), RED); 
-            EndMode2D();
-
-            DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
-        EndTextureMode();
-
-        // This block will draw the texture
-        BeginDrawing();
-            ClearBackground(BLACK);
-
-            float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
-                              (float) GetScreenHeight() / (float) gameHeight);
-
-            Rectangle src = { 0 };
-            src.width = rendTarg.texture.width;
-            src.height = -rendTarg.texture.height;
-
-            // This destination rect will scale the screen while keeping it centered
-            Rectangle dest = { 0 };
-            dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
-            dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
-            dest.width = gameWidth * scale;
-            dest.height = gameHeight * scale;
-
-            Vector2 offset = { 0 };
-            offset.x = 0.0f;
-            offset.y = 0.0f;
-
-            DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
-
-            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
-        EndDrawing();
+        // Side effects of state 
+        DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
     }
 
     // Tear-Down env

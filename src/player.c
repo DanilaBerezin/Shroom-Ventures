@@ -24,7 +24,7 @@ Player NextPlayer(State *st) {
         // Calculate what the next rectangle's position would be assuming no collision happened
         Rectangle currRect = HitBox(&st->player);
         Rectangle nextRect = currRect;
-        nextRect.y = currRect.y + (st->player.vel.y + G * st->delta) * st->delta;
+        nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
         
         // Check to see if collisions occur
         Platform plat = st->mapPlats[i];
@@ -38,7 +38,7 @@ Player NextPlayer(State *st) {
     }
 
     // Dash state logic
-    if (st->player.isDash && st->player.dashTime + st->delta > MAX_DASH_TIME) {
+    if (st->player.isDash && st->player.dashTime + DELTA_TIME > MAX_DASH_TIME) {
         nextPlay.isDash = false;
         nextPlay.dashTime = 0.0f;
     } else if (!st->player.isDash && IsKeyDown(KEY_LEFT_SHIFT)
@@ -47,7 +47,7 @@ Player NextPlayer(State *st) {
         nextPlay.dashTime = st->player.dashTime;
     } else if (st->player.isDash) {
         nextPlay.isDash = st->player.isDash;
-        nextPlay.dashTime = st->player.dashTime + st->delta;
+        nextPlay.dashTime = st->player.dashTime + DELTA_TIME;
     } else {
         nextPlay.isDash = st->player.isDash;
         nextPlay.dashTime = st->player.dashTime;
@@ -60,7 +60,7 @@ Player NextPlayer(State *st) {
         xSpeed = PLAYER_SPRINT_SPEED;
     } else {
         xSpeed = PLAYER_HOR_SPEED;
-        nextPlay.walkTime = st->player.walkTime + st->delta;
+        nextPlay.walkTime = st->player.walkTime + DELTA_TIME;
     }
 
     // Calculate x-component of velocity, coupled with dash state logic
@@ -83,18 +83,18 @@ Player NextPlayer(State *st) {
                                   || nextPlay.isDash) {
         nextPlay.vel.y = 0;
     } else {
-        nextPlay.vel.y = st->player.vel.y + G * st->delta;
+        nextPlay.vel.y = st->player.vel.y + G * DELTA_TIME;
     }
 
     // Calculate x-component of position. Coupled to x-component of velocity
-    nextPlay.pos.x = st->player.pos.x + nextPlay.vel.x * st->delta;
+    nextPlay.pos.x = st->player.pos.x + nextPlay.vel.x * DELTA_TIME;
 
     // Calculate y-component of position. Coupled to y-component of velocity. 
     if (colInfo.willColl) {
         Platform colPlat = colInfo.plat;
         nextPlay.pos.y = colPlat.rect.y - st->player.height;
     } else {
-        nextPlay.pos.y = st->player.pos.y + nextPlay.vel.y * st->delta;
+        nextPlay.pos.y = st->player.pos.y + nextPlay.vel.y * DELTA_TIME;
     }
 
     // Crouch logic changed y-position, so is unfortunately coupled to y-position

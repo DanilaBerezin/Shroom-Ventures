@@ -3,10 +3,11 @@ include config.mk
 CC := gcc
 CFLAGS := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 CFLAGS += -std=gnu99
-CFLAGS += -L$(RAYLIB_INSTALL)/lib 
+CFLAGS += -L$(RAYLIB_INSTALL)/lib
 CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes
 CFLAGS += -MD
+CFLAGS += $(CONFIG)
 CFILES := $(wildcard ./src/*.c)
 OBJS := $(patsubst ./src/%.c, ./bin/%.o, $(CFILES))
 DEPS := $(patsubst ./src/%.c, ./bin/%.d, $(CFILES))
