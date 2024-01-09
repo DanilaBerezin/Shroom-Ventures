@@ -6,9 +6,17 @@
 #include "player.h"
 #include "map.h"
 
+enum AppState {
+    RUNNING,
+    PAUSED
+};
+
 typedef struct state {
     // System state
     float           frameTime;
+
+    // Application state
+    enum AppState   currAppState; 
 
     // World state
     uint32_t        numPlats;

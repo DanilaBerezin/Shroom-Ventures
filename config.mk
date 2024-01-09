@@ -5,7 +5,8 @@ PLATFORM ?= LINUX
 TARGET_NAME ?= shroom_ventures
 
 # Compile time configuration options (pre processor defines)
-CONFIG += -D DELTA_TIME=0.0167f			# Around 1/60, appropriate delta time for 60 FPS
+# Around 1/60, appropriate delta time for 60 FPS
+CONFIG += -D DELTA_TIME=0.0167f
 
 # Each platform will have it's own set of platform-specific default config values.
 # RAYLIB_INSTALL : the COMMON parent of the directory which contains the installation for raylib library and the directory which contains the installation for it's headers

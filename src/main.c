@@ -80,6 +80,7 @@ int main(void) {
 
     // Setting the state
     State st = { 0 };
+    st.currAppState = RUNNING;
     st.numPlats = ARRAY_SIZE(mapPlats);
     st.mapPlats = mapPlats;
     st.numBuilds = MAX_BUILDINGS;
@@ -93,15 +94,30 @@ int main(void) {
     while (!WindowShouldClose()){
         // Fixed time step implementation, doesn't handle death-spiral case
         st = NextSystemState(&st);
-        accTime += st.frameTime;
-        while (accTime > DELTA_TIME){
-            // Update state here:
-            st = NextWorldState(&st, gameWidth);
-            accTime -= DELTA_TIME;
+        switch (st.currAppState) {
+        case RUNNING: 
+            if (IsKeyDown(KEY_ESCAPE))
+                    st.currAppState = PAUSED;
+            accTime += st.frameTime;
+            while (accTime > DELTA_TIME){
+                // Update state here:
+                st = NextWorldState(&st, gameWidth);
+                accTime -= DELTA_TIME;
+            }
+
+            // Side effects of state 
+            DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
+
+            break;
+        case PAUSED:
+            if (IsKeyDown(KEY_ESCAPE))
+                    st.currAppState = RUNNING;
+            // Side effects of state 
+            DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
+
+            break;
         }
 
-        // Side effects of state 
-        DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
     }
 
     // Tear-Down env
