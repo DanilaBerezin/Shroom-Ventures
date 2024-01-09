@@ -15,7 +15,7 @@ State NextSystemState(State *st) {
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
-static Camera2D NextCamera(State *st, int gameWidth) {
+static Camera2D NextCamera(State *st) {
     Camera2D nextCam = { 0 };
     nextCam.rotation = st->camera.rotation;
     nextCam.zoom = st->camera.zoom;
@@ -24,7 +24,7 @@ static Camera2D NextCamera(State *st, int gameWidth) {
     const float offsetCoeff = 1.5f;
     const float maxDiff = 200;
     float currOffset = st->camera.offset.x;
-    float offsetTarget = (float) gameWidth / 2.0f;
+    float offsetTarget = (float) GAME_WIDTH / 2.0f;
     if ((int) st->player.vel.x < 0){
         offsetTarget +=  maxDiff;
     } else if ((int) st->player.vel.x > 0){
@@ -54,14 +54,14 @@ static Camera2D NextCamera(State *st, int gameWidth) {
     return nextCam;
 }
 
-State NextWorldState(State *st, int gameWidth) {
+State NextWorldState(State *st) {
     State nextWorld = *st;
     nextWorld.player = NextPlayer(&nextWorld);
-    nextWorld.camera = NextCamera(&nextWorld, gameWidth);
+    nextWorld.camera = NextCamera(&nextWorld);
     return nextWorld;
 }
 
-void DrawWorldState(State *st, RenderTexture2D rendTarg, int gameWidth, int gameHeight) {
+void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 	BeginTextureMode(rendTarg);
         ClearBackground(RAYWHITE);
             
@@ -85,8 +85,8 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg, int gameWidth, int game
     BeginDrawing();
         ClearBackground(BLACK);
 
-        float scale = MIN((float) GetScreenWidth() / (float) gameWidth, 
-                          (float) GetScreenHeight() / (float) gameHeight);
+        float scale = MIN((float) GetScreenWidth() / (float) GAME_WIDTH, 
+                          (float) GetScreenHeight() / (float) GAME_HEIGHT);
 
         Rectangle src = { 0 };
         src.width = rendTarg.texture.width;
@@ -94,10 +94,10 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg, int gameWidth, int game
 
         // This destination rect will scale the screen while keeping it centered
         Rectangle dest = { 0 };
-        dest.x = 0.5f * ((float) GetScreenWidth() - (float) gameWidth * scale);
-        dest.y = 0.5f * ((float) GetScreenHeight() - (float) gameHeight * scale);
-        dest.width = gameWidth * scale;
-        dest.height = gameHeight * scale;
+        dest.x = 0.5f * ((float) GetScreenWidth() - (float) GAME_WIDTH * scale);
+        dest.y = 0.5f * ((float) GetScreenHeight() - (float) GAME_HEIGHT * scale);
+        dest.width = GAME_WIDTH * scale;
+        dest.height = GAME_HEIGHT * scale;
 
         Vector2 offset = { 0 };
         offset.x = 0.0f;

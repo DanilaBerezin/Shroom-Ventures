@@ -30,8 +30,8 @@ typedef struct state {
 
 State NextSystemState(State *st);
 
-State NextWorldState(State *st, int gameWidth);
+State NextWorldState(State *st);
 
-void DrawWorldState(State *st, RenderTexture2D, int gameWidth, int gameHeight);
+void DrawWorldState(State *st, RenderTexture2D rendTarg);
 
 #endif

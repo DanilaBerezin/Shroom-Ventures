@@ -7,16 +7,10 @@
 #include "debug.h"
 #include "macros.h"
 
-#ifdef DEBUG
-    #define GetFrameTime() DELTA_TIME;
-#endif
-
 int main(void) {
     // Initializing application stuff 
     const int windowWidth = 800;
     const int windowHeight = 450;
-    const int gameWidth = 1600;
-    const int gameHeight = 900;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
@@ -27,7 +21,7 @@ int main(void) {
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
     // maintaining aspect ratio
-    RenderTexture2D rendTarg = LoadRenderTexture(gameWidth, gameHeight);
+    RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
     
     // Map platforms
@@ -46,7 +40,7 @@ int main(void) {
         float height = GetRandomValue(100,800);
         builds[i].width = width;
         builds[i].height = height;
-        builds[i].y = gameHeight - (gameHeight - gnd.rect.y) - height;
+        builds[i].y = GAME_HEIGHT - (GAME_HEIGHT - gnd.rect.y) - height;
         builds[i].x = gnd.rect.x + spacing;
 
         buildCols[i].r = GetRandomValue(200,240);
@@ -73,8 +67,8 @@ int main(void) {
     cam.target = play.pos;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
-    cam.offset.x = (float) gameWidth / 2.0f;
-    cam.offset.y = (float) gameHeight / 2.0f;
+    cam.offset.x = (float) GAME_WIDTH / 2.0f;
+    cam.offset.y = (float) GAME_HEIGHT / 2.0f;
     cam.rotation = 0.0f;
     cam.zoom = 1.0f;
 
@@ -96,24 +90,28 @@ int main(void) {
         st = NextSystemState(&st);
         switch (st.currAppState) {
         case RUNNING: 
-            if (IsKeyDown(KEY_ESCAPE))
+            if (IsKeyDown(KEY_ESCAPE)) {
                     st.currAppState = PAUSED;
+                    dbg_print("WE ARE RUNNNING\n");
+            }
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
-                st = NextWorldState(&st, gameWidth);
+                st = NextWorldState(&st);
                 accTime -= DELTA_TIME;
             }
 
             // Side effects of state 
-            DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
+            DrawWorldState(&st, rendTarg);        
 
             break;
         case PAUSED:
-            if (IsKeyDown(KEY_ESCAPE))
+            if (IsKeyDown(KEY_ESCAPE)) {
                     st.currAppState = RUNNING;
+                    dbg_print("WE ARE PAUSEDDDD\n");
+            }
             // Side effects of state 
-            DrawWorldState(&st, rendTarg, gameWidth, gameHeight);        
+            DrawWorldState(&st, rendTarg);        
 
             break;
         }

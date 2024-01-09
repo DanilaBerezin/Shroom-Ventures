@@ -5,8 +5,12 @@ PLATFORM ?= LINUX
 TARGET_NAME ?= shroom_ventures
 
 # Compile time configuration options (pre processor defines)
-# Around 1/60, appropriate delta time for 60 FPS
-CONFIG += -D DELTA_TIME=0.0167f
+
+CONFIG += -D DELTA_TIME=0.0167f#	# Around 1/60, appropriate delta time for 60 FPS
+CONFIG += -D GAME_WIDTH=1600# 		# The width of the game screen on a render texture,
+									# in pixels
+CONFIG += -D GAME_HEIGHT=900#		# The height of the game screen on a render texture,
+									# in pixels
 
 # Each platform will have it's own set of platform-specific default config values.
 # RAYLIB_INSTALL : the COMMON parent of the directory which contains the installation for raylib library and the directory which contains the installation for it's headers
