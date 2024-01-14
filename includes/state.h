@@ -32,11 +32,12 @@ typedef struct state {
     enum AppState   currAppState; 
 
     // World state
+    Texture2D       background;
     uint32_t        numPlats;
     Platform        *mapPlats;
-    uint32_t        numBuilds;
-    Rectangle       *builds;
-    Color           *buildCols;
+    //uint32_t        numBuilds;
+    //Rectangle       *builds;
+    //Color           *buildCols;
     Player          player;
     Camera2D        camera;
 } State;

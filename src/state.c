@@ -28,6 +28,8 @@ State NextSystemState(State *st) {
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
+// TODO: permanently couple this to the player and have this function
+// be called as a helper to NextPlayer()
 static Camera2D NextCamera(State *st) {
     Camera2D nextCam = { 0 };
     nextCam.rotation = st->camera.rotation;
@@ -77,12 +79,15 @@ State NextWorldState(State *st) {
 void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 	BeginTextureMode(rendTarg);
         ClearBackground(RAYWHITE);
+
+        // Draw the background
+        DrawTextureEx(st->background, (Vector2) { 0, 0 }, 0.0f, 1.0f, WHITE);
             
         // Draw stuff in camera coordinates in mode2D block 
         BeginMode2D(st->camera);
-            for (uint32_t i = 0; i < st->numBuilds; i++) {
-                DrawRectangleRec(st->builds[i], st->buildCols[i]);
-            }
+            // for (uint32_t i = 0; i < st->numBuilds; i++) {
+            //     DrawRectangleRec(st->builds[i], st->buildCols[i]);
+            // }
             
             for (uint32_t i = 0; i < st->numPlats; i++) {
                 DrawRectangleRec(st->mapPlats[i].rect, st->mapPlats[i].color);
