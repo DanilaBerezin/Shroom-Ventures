@@ -6,6 +6,19 @@
 State NextSystemState(State *st) {
     State nextSys = *st;
     nextSys.frameTime = GetFrameTime();
+
+    // Request logic begins here
+    uint64_t requests = NO_REQUESTS;
+    
+    // Pause and unpause request logic
+    bool prevPausePress = st->userState->prevPausePress;
+    bool currPausePress = IsKeyDown(KEY_ESCAPE);
+    if (currPausePress && !prevPausePress) {
+        requests |= PAUSE_UNPAUSE_REQUESTED;
+    } 
+    nextSys.userState->prevPausePress = currPausePress;
+
+    nextSys.userState->inputRequests = requests;
     return nextSys;
 }
 

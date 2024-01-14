@@ -23,6 +23,11 @@ int main(void) {
     // maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
+
+    // User input state
+    // TODO: use a region allocator for all these pointers and create an initialization
+    // function
+    UserInputState usrSt = { 0 };
     
     // Map platforms
     Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
@@ -74,6 +79,7 @@ int main(void) {
 
     // Setting the state
     State st = { 0 };
+    st.userState = &usrSt;
     st.currAppState = RUNNING;
     st.numPlats = ARRAY_SIZE(mapPlats);
     st.mapPlats = mapPlats;
@@ -90,7 +96,8 @@ int main(void) {
         st = NextSystemState(&st);
         switch (st.currAppState) {
         case RUNNING: 
-            if (IsKeyDown(KEY_ESCAPE)) {
+            // TODO: make this check a generic function
+            if (st.userState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
                     st.currAppState = PAUSED;
                     dbg_print("WE ARE RUNNNING\n");
             }
@@ -106,7 +113,7 @@ int main(void) {
 
             break;
         case PAUSED:
-            if (IsKeyDown(KEY_ESCAPE)) {
+            if (st.userState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
                     st.currAppState = RUNNING;
                     dbg_print("WE ARE PAUSEDDDD\n");
             }

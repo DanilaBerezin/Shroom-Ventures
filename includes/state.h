@@ -11,9 +11,22 @@ enum AppState {
     PAUSED
 };
 
+// TODO: add requests for every other behavior in the game so far
+#define NO_REQUESTS             (0)
+#define PAUSE_UNPAUSE_REQUESTED (1)
+
+typedef struct {
+    // Internal state
+    bool            prevPausePress;
+    
+    // Stuff external functionality will care about
+    uint64_t        inputRequests;
+} UserInputState;
+
 typedef struct state {
     // System state
     float           frameTime;
+    UserInputState  *userState;
 
     // Application state
     enum AppState   currAppState; 
