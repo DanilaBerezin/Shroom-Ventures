@@ -56,12 +56,15 @@ static Camera2D NextCamera(State *st) {
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    Vector2 diff = Vector2Subtract(st->player.pos, st->camera.target);
+    float diff = st->player.pos.x - st->camera.target.x;
 
-    float length = Vector2Length(diff);
+    float length = fabsf(diff);
     if (length > minEffectLength) {
+        Vector2 adjust = { 0 };
+        adjust.x = diff;
+
         float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(diff, speed * DELTA_TIME / length));
+        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(adjust, speed * DELTA_TIME / length));
     } else {
        nextCam.target = st->camera.target;
     }
@@ -81,14 +84,11 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
         ClearBackground(RAYWHITE);
 
         // Draw the background
-        DrawTextureEx(st->background, (Vector2) { 0, 0 }, 0.0f, 1.0f, WHITE);
+        Vector2 pos = { 0 };
+        DrawTextureEx(st->background, pos, 0.0f, 1.0f, WHITE);
             
         // Draw stuff in camera coordinates in mode2D block 
         BeginMode2D(st->camera);
-            // for (uint32_t i = 0; i < st->numBuilds; i++) {
-            //     DrawRectangleRec(st->builds[i], st->buildCols[i]);
-            // }
-            
             for (uint32_t i = 0; i < st->numPlats; i++) {
                 DrawRectangleRec(st->mapPlats[i].rect, st->mapPlats[i].color);
             }

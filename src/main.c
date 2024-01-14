@@ -38,27 +38,7 @@ int main(void) {
                            InitPlatforms(650, 200, 100, 10, true, GRAY),
                            InitPlatforms(250, 200, 100, 10, true, GRAY),
                            InitPlatforms(300, 100, 400, 10, true, GRAY), };
-
-    // Background buildings 
-    //Rectangle builds[MAX_BUILDINGS];
-    //Color buildCols[MAX_BUILDINGS];
     Platform gnd = mapPlats[0];
-    //uint32_t spacing = 0;
-    //for (uint32_t i = 0; i < MAX_BUILDINGS; i++){
-    //    float width = GetRandomValue(50,200);
-    //    float height = GetRandomValue(100,800);
-    //    builds[i].width = width;
-    //    builds[i].height = height;
-    //    builds[i].y = GAME_HEIGHT - (GAME_HEIGHT - gnd.rect.y) - height;
-    //    builds[i].x = gnd.rect.x + spacing;
-
-    //    buildCols[i].r = GetRandomValue(200,240);
-    //    buildCols[i].g = GetRandomValue(200,240);
-    //    buildCols[i].b = GetRandomValue(200,250);
-    //    buildCols[i].a = 255;
-    //    
-    //    spacing += (uint32_t) builds[i].width;
-    //}
 
     // Player
     Player play = { 0 };
@@ -73,7 +53,9 @@ int main(void) {
 
     // Camera
     Camera2D cam = { 0 };
-    cam.target = play.pos;
+    //cam.target = play.pos;
+    cam.target.x = play.pos.x;
+    cam.target.y = 0;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
     // this offset allows you to move the camera so that it is centered on the target 
     cam.offset.x = (float) GAME_WIDTH / 2.0f;
@@ -88,9 +70,6 @@ int main(void) {
     st.currAppState = RUNNING;
     st.numPlats = ARRAY_SIZE(mapPlats);
     st.mapPlats = mapPlats;
-    //st.numBuilds = MAX_BUILDINGS;
-    //st.builds = builds;
-    //st.buildCols = buildCols;
     st.player = play;
     st.camera = cam;
 
