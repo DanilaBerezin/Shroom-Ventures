@@ -28,16 +28,14 @@ State NextSystemState(State *st) {
 // values to ints makes it look a bit smoother imo and rounding
 // doesn't seem to make a difference? Oh well I'll tinker with this
 // later
-// TODO: permanently couple this to the player and have this function
-// be called as a helper to NextPlayer()
 static Camera2D NextCamera(State *st) {
     Camera2D nextCam = { 0 };
     nextCam.rotation = st->camera.rotation;
     nextCam.zoom = st->camera.zoom;
 
     // PID smoothing for camera motion when you move left or right
-    const float offsetCoeff = 1.5f;
-    const float maxDiff = 200;
+    const float offsetCoeff = 2.0f;
+    const float maxDiff = 400.0f;
     float currOffset = st->camera.offset.x;
     float offsetTarget = (float) GAME_WIDTH / 2.0f;
     if ((int) st->player.vel.x < 0){
@@ -98,31 +96,4 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 
         DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
     EndTextureMode();
-
-    // This block will draw the texture
-    BeginDrawing();
-        ClearBackground(BLACK);
-
-        float scale = MIN((float) GetScreenWidth() / (float) GAME_WIDTH, 
-                          (float) GetScreenHeight() / (float) GAME_HEIGHT);
-
-        Rectangle src = { 0 };
-        src.width = rendTarg.texture.width;
-        src.height = -rendTarg.texture.height;
-
-        // This destination rect will scale the screen while keeping it centered
-        Rectangle dest = { 0 };
-        dest.x = 0.5f * ((float) GetScreenWidth() - (float) GAME_WIDTH * scale);
-        dest.y = 0.5f * ((float) GetScreenHeight() - (float) GAME_HEIGHT * scale);
-        dest.width = GAME_WIDTH * scale;
-        dest.height = GAME_HEIGHT * scale;
-
-        Vector2 offset = { 0 };
-        offset.x = 0.0f;
-        offset.y = 0.0f;
-
-        DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
-
-        PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
-    EndDrawing();
 }

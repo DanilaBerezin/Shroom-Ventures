@@ -84,6 +84,7 @@ int main(void) {
             if (st.userState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
                     st.currAppState = PAUSED;
             }
+
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
@@ -99,11 +100,36 @@ int main(void) {
                     st.currAppState = RUNNING;
             }
             
-            // Side effects of state 
-            DrawWorldState(&st, rendTarg);        
+            // TODO: insert shader here and a pause menu
             break;
         }
 
+        // This block will draw the texture
+        BeginDrawing();
+            ClearBackground(BLACK);
+    
+            float scale = MIN((float) GetScreenWidth() / (float) GAME_WIDTH, 
+                              (float) GetScreenHeight() / (float) GAME_HEIGHT);
+    
+            Rectangle src = { 0 };
+            src.width = rendTarg.texture.width;
+            src.height = -rendTarg.texture.height;
+    
+            // This destination rect will scale the screen while keeping it centered
+            Rectangle dest = { 0 };
+            dest.x = 0.5f * ((float) GetScreenWidth() - (float) GAME_WIDTH * scale);
+            dest.y = 0.5f * ((float) GetScreenHeight() - (float) GAME_HEIGHT * scale);
+            dest.width = GAME_WIDTH * scale;
+            dest.height = GAME_HEIGHT * scale;
+    
+            Vector2 offset = { 0 };
+            offset.x = 0.0f;
+            offset.y = 0.0f;
+    
+            DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
+    
+            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
+        EndDrawing();
     }
 
     // Tear-Down env
