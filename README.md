@@ -7,14 +7,14 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 3) ~~Finish character movement control (sprint, crouch etc)~~
 4) ~~Implement a dash mechanic instead of a sprint mechanic~~
 5) ~~Implement a fixed time step instead of a variable one~~
-5) Figure out a pause screen
-6) Figure out a static background
-7) Figure out a "ground" instead of just having a "platform"
-8) Figure out basic map file format
-9) Load a map
+5) ~~Figure out a pause screen~~
+6) ~~Figure out a static background~~
+7) ~~Figure out background soundtrack~~
+8) Figure out sound effects for
+9) Figure out animations
 10) Create a startup menu
-11) Figure out animations
-12) Figure out basic ai
+11) Figure out basic ai
+12) Load a map (maybe? see how it goes)
 13) ~~Reinstall raylib and link against archive instead of shared library~~
 14) ~~Make makefile configurable and not dependent on my setup~~
 
