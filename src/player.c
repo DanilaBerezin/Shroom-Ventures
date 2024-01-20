@@ -14,6 +14,7 @@ Rectangle HitBox(Player *play) {
 Player NextPlayer(State *st) {
     Player nextPlay = { 0 };
     nextPlay.width = st->player.width;
+    nextPlay.jumpSound = st->player.jumpSound;
 
     // Check for collisions
     struct { 
@@ -79,11 +80,14 @@ Player NextPlayer(State *st) {
     // Calculate y-component of velocity, coupled with dash state logic as well
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = -PLAYER_JUMP_SPEED;
+        nextPlay.playJumpSound = true;
     } else if ((!IsKeyDown(KEY_W) && colInfo.willColl)
                                   || nextPlay.isDash) {
         nextPlay.vel.y = 0;
+        nextPlay.playJumpSound = st->player.playJumpSound;
     } else {
         nextPlay.vel.y = st->player.vel.y + G * DELTA_TIME;
+        nextPlay.playJumpSound = st->player.playJumpSound;
     }
 
     // Calculate x-component of position. Coupled to x-component of velocity
@@ -113,6 +117,13 @@ Player NextPlayer(State *st) {
     }
 
     return nextPlay;
+}
+
+void PlayPlayerSound(Player *play) {
+    if(play->playJumpSound) {
+        PlaySound(play->jumpSound);
+        play->playJumpSound = false;
+    }
 }
 
 

@@ -61,6 +61,9 @@ int main(void) {
     play.isCrouch = false;
     play.isDash = false;
     play.dashTime = 0.0f;
+    play.walkTime = 0.0f;
+    play.playJumpSound = false;
+    play.jumpSound = LoadSound("assets/jump.wav");
 
     // Camera
     Camera2D cam = { 0 };
@@ -82,7 +85,7 @@ int main(void) {
     st.camera = cam;
     
     PlayMusicStream(st.bgMusic);
-
+    
     // Main game loop
     float accTime = 0;
     while (!WindowShouldClose()){
@@ -113,7 +116,8 @@ int main(void) {
             // TODO: insert shader here and a pause menu
             break;
         }
-        
+
+       
         // Update sound here
         PlayWorldStateSound(&st);
 
@@ -150,6 +154,7 @@ int main(void) {
     UnloadTexture(st.background);
     UnloadRenderTexture(rendTarg);
     UnloadMusicStream(st.bgMusic);
+    UnloadSound(play.jumpSound);
     CloseAudioDevice();
     CloseWindow();
     return 0;

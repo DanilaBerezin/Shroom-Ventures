@@ -31,10 +31,18 @@ typedef struct player {
     bool    isDash;
     float   dashTime;
     float   walkTime;
+
+    // Sound FX stuff
+    bool    playJumpSound;
+    Sound   jumpSound;
 } Player;
 
 Rectangle HitBox(Player *play);
 
+void PlayPlayerSound(Player *play);
+
+// TODO: make these "Next" functions return void
 Player NextPlayer(State *st);
+
 
 #endif

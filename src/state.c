@@ -100,4 +100,5 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 
 void PlayWorldStateSound(State *st) {
     UpdateMusicStream(st->bgMusic);
+    PlayPlayerSound(&st->player);
 }
