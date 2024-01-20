@@ -38,3 +38,8 @@ To build on Windows you first have to install raylib following the installation 
 Or modify the value of `PLATFORM` in the `config.mk` file and set it to `MSYS` and then run
     
     make release
+
+### Credits
+
+Gabby Falkowski - All the drawn art is made by her
+Background music - Epic background orchestral music. Fairytale World Emily. Hip-Hop ver. by White_Records.

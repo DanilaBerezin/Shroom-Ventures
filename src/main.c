@@ -20,6 +20,7 @@ int main(void) {
     SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
                                                                 // ESC key
     SetTargetFPS(60);
+    //TODO: make app fullscreen by default, make default configurable
 
     // Audio stuff
     InitAudioDevice();
