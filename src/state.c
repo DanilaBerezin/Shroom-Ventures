@@ -11,14 +11,14 @@ State NextSystemState(State *st) {
     uint64_t requests = NO_REQUESTS;
     
     // Pause and unpause request logic
-    bool prevPausePress = st->userState->prevPausePress;
+    bool prevPausePress = st->inpState->prevPausePress;
     bool currPausePress = IsKeyDown(KEY_ESCAPE);
     if (currPausePress && !prevPausePress) {
         requests |= PAUSE_UNPAUSE_REQUESTED;
     } 
-    nextSys.userState->prevPausePress = currPausePress;
+    nextSys.inpState->prevPausePress = currPausePress;
 
-    nextSys.userState->inputRequests = requests;
+    nextSys.inpState->inputRequests = requests;
     return nextSys;
 }
 
@@ -96,4 +96,8 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 
         DrawText("Move rectangle with doom keys", 10, 10, 30, BLACK);
     EndTextureMode();
+}
+
+void PlayWorldStateSound(State *st) {
+    UpdateMusicStream(st->bgMusic);
 }

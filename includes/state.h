@@ -26,7 +26,7 @@ typedef struct {
 typedef struct state {
     // System state
     float           frameTime;
-    UserInputState  *userState;
+    UserInputState  *inpState;
 
     // Application state
     enum AppState   currAppState; 
@@ -35,9 +35,7 @@ typedef struct state {
     Texture2D       background;
     uint32_t        numPlats;
     Platform        *mapPlats;
-    //uint32_t        numBuilds;
-    //Rectangle       *builds;
-    //Color           *buildCols;
+    Music           bgMusic;
     Player          player;
     Camera2D        camera;
 } State;
@@ -47,5 +45,7 @@ State NextSystemState(State *st);
 State NextWorldState(State *st);
 
 void DrawWorldState(State *st, RenderTexture2D rendTarg);
+
+void PlayWorldStateSound(State *st);
 
 #endif

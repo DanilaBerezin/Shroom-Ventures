@@ -23,21 +23,25 @@ int main(void) {
 
     // Audio stuff
     InitAudioDevice();
-    Music bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
-    PlayMusicStream(bgMusic);
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
     // maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
+    
+    // Initializing state
+    State st = { 0 };
 
     // User input state
     // TODO: use an arena allocator for all these pointers and create an initialization
     // function
-    UserInputState usrSt = { 0 };
+    UserInputState inpSt = { 0 };
 
     // Load background texture
-    Texture2D background = LoadTexture("assets/bg0.png");
+    st.background = LoadTexture("assets/bg0.png");
+    
+    // Load background music
+    st.bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
     
     // Map platforms
     Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, BROWN),
@@ -69,14 +73,14 @@ int main(void) {
     cam.zoom = 1.0f;
 
     // Setting the state
-    State st = { 0 };
-    st.userState = &usrSt;
-    st.background = background;
+    st.inpState = &inpSt;
     st.currAppState = RUNNING;
     st.numPlats = ARRAY_SIZE(mapPlats);
     st.mapPlats = mapPlats;
     st.player = play;
     st.camera = cam;
+    
+    PlayMusicStream(st.bgMusic);
 
     // Main game loop
     float accTime = 0;
@@ -86,7 +90,7 @@ int main(void) {
         switch (st.currAppState) {
         case RUNNING: 
             // TODO: make this check a generic function
-            if (st.userState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
+            if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
                     st.currAppState = PAUSED;
             }
 
@@ -101,15 +105,16 @@ int main(void) {
             DrawWorldState(&st, rendTarg);        
             break;
         case PAUSED:
-            if (st.userState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
+            if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
                     st.currAppState = RUNNING;
             }
             
             // TODO: insert shader here and a pause menu
             break;
         }
-
-        UpdateMusicStream(bgMusic);
+        
+        // Update sound here
+        PlayWorldStateSound(&st);
 
         // This block will draw the texture
         BeginDrawing();
@@ -141,9 +146,9 @@ int main(void) {
 
     // Tear-Down env
     // TODO: get rid of this stuff except for maybe CloseWindow()?
-    UnloadTexture(background);
+    UnloadTexture(st.background);
     UnloadRenderTexture(rendTarg);
-    UnloadMusicStream(bgMusic);
+    UnloadMusicStream(st.bgMusic);
     CloseAudioDevice();
     CloseWindow();
     return 0;
