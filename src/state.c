@@ -94,6 +94,6 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
             DrawRectangleRec(HitBox(&st->player), RED); 
         EndMode2D();
 
-        DrawText("Move rectangle with doom keys", 10, 10, 30, DARKGRAY);
+        DrawText("Move rectangle with doom keys", 10, 10, 30, BLACK);
     EndTextureMode();
 }

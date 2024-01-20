@@ -6,8 +6,8 @@
 
 // In pixels per second
 #define PLAYER_JUMP_SPEED 500.0f
-#define PLAYER_HOR_SPEED 400.0f
-#define PLAYER_SPRINT_SPEED 800.0f
+#define PLAYER_HOR_SPEED 500.0f
+#define PLAYER_DASH_SPEED 800.0f
 
 // In pixels
 #define PLAYER_DEFAULT_HEIGHT 40

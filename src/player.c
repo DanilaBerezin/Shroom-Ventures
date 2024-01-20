@@ -57,7 +57,7 @@ Player NextPlayer(State *st) {
     float xSpeed;
     if (nextPlay.isDash && !st->player.isCrouch) {
         nextPlay.walkTime = 0.0f;
-        xSpeed = PLAYER_SPRINT_SPEED;
+        xSpeed = PLAYER_DASH_SPEED;
     } else {
         xSpeed = PLAYER_HOR_SPEED;
         nextPlay.walkTime = st->player.walkTime + DELTA_TIME;

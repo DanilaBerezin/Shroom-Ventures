@@ -12,13 +12,19 @@ int main(void) {
     // TODO: add these to compile time constants
     const int windowWidth = 800;
     const int windowHeight = 450;
-
+    
+    // Graphics stuff
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(800, 450);
     SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
                                                                 // ESC key
     SetTargetFPS(60);
+
+    // Audio stuff
+    InitAudioDevice();
+    Music bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
+    PlayMusicStream(bgMusic);
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
     // maintaining aspect ratio
@@ -31,13 +37,13 @@ int main(void) {
     UserInputState usrSt = { 0 };
 
     // Load background texture
-    Texture2D background = LoadTexture("res/cloudy-background.png");
+    Texture2D background = LoadTexture("assets/bg0.png");
     
     // Map platforms
-    Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, GRAY),
-                           InitPlatforms(650, 200, 100, 10, true, GRAY),
-                           InitPlatforms(250, 200, 100, 10, true, GRAY),
-                           InitPlatforms(300, 100, 400, 10, true, GRAY), };
+    Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, BROWN),
+                           InitPlatforms(650, 200, 100, 10, true, BROWN),
+                           InitPlatforms(250, 200, 100, 10, true, BROWN),
+                           InitPlatforms(300, 100, 400, 10, true, BROWN), };
     Platform gnd = mapPlats[0];
 
     // Player
@@ -53,7 +59,6 @@ int main(void) {
 
     // Camera
     Camera2D cam = { 0 };
-    //cam.target = play.pos;
     cam.target.x = play.pos.x;
     cam.target.y = 0;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
@@ -104,6 +109,8 @@ int main(void) {
             break;
         }
 
+        UpdateMusicStream(bgMusic);
+
         // This block will draw the texture
         BeginDrawing();
             ClearBackground(BLACK);
@@ -133,8 +140,11 @@ int main(void) {
     }
 
     // Tear-Down env
+    // TODO: get rid of this stuff except for maybe CloseWindow()?
     UnloadTexture(background);
     UnloadRenderTexture(rendTarg);
+    UnloadMusicStream(bgMusic);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
