@@ -10,7 +10,7 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 5) ~~Figure out a pause screen~~
 6) ~~Figure out a static background~~
 7) ~~Figure out background soundtrack~~
-8) Figure out sound effects for
+8) ~~Figure out sound effects for player~~
 9) Figure out animations
 10) Create a startup menu
 11) Figure out basic ai
@@ -43,3 +43,4 @@ Or modify the value of `PLATFORM` in the `config.mk` file and set it to `MSYS` a
 
 Gabby Falkowski - All the drawn art is made by her
 Background music - Epic background orchestral music. Fairytale World Emily. Hip-Hop ver. by White_Records. [link to music](https://pixabay.com/music/beats-epic-background-orchestral-music-fairytale-world-emily-hip-hop-ver-185382/)
+Player jump sound effect - Jump_C_02 by Pxabay [link](https://pixabay.com/sound-effects/jump-c-02-102843/)
