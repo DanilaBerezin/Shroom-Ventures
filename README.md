@@ -42,5 +42,5 @@ Or modify the value of `PLATFORM` in the `config.mk` file and set it to `MSYS` a
 ### Credits
 
 Gabby Falkowski - All the drawn art is made by her
-Background music - Epic background orchestral music. Fairytale World Emily. Hip-Hop ver. by White_Records. [link to music](https://pixabay.com/music/beats-epic-background-orchestral-music-fairytale-world-emily-hip-hop-ver-185382/)
+Background music - Coming Home Soundtrack, 01 reversed by Rachel Wang [link](https://rachelwang.itch.io/coming-home-original-soundtrack)
 Player jump sound effect - Jump_C_02 by Pxabay [link](https://pixabay.com/sound-effects/jump-c-02-102843/)
