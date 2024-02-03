@@ -11,6 +11,11 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 6) ~~Figure out a static background~~
 7) ~~Figure out background soundtrack~~
 8) ~~Figure out sound effects for player~~
+9) Refactor day tomorrow:
+    - Move background and background music into map
+    - Give map and player initializer functions
+    - Give map and player draw functions
+    - Give background play sound function
 9) Figure out animations
 10) Create a startup menu
 11) Figure out basic ai
