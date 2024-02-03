@@ -16,8 +16,11 @@ void CreateArena(Arena *arena, size_t bytes) {
 }
 
 void *ArenaAlloc(Arena *arena, size_t bytes) {
+    if (arena->err) {
+        return NULL;
+    }
+
     if (arena->count + bytes > arena->capacity) {
-        arena->err = true;
         return NULL;
     }
     
@@ -28,5 +31,9 @@ void *ArenaAlloc(Arena *arena, size_t bytes) {
 
 // No check for null ptr, it's your problem if you pass a null ptr here
 void DestroyArena(Arena *arena) {
+    if (arena->err) {
+        return;
+    }
+
     free(arena->buff);
 }
