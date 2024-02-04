@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include <string.h>
+
 #include "raylib.h"
 #include "raymath.h"
-#include "player.h"
-#include "map.h"
 #include "state.h"
+#include "map.h"
+#include "player.h"
+#include "camera.h"
 #include "arena.h"
 #include "debug.h"
 #include "macros.h"
@@ -27,18 +29,22 @@ int main(void) {
 
     InitAudioDevice();
 
-    // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
-    // maintaining aspect ratio
-    RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
-    SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
-    
-    // Initializing arena allocator
+    RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);  // RenderTexture allows us to stretch 
+                                                                            // screen while keeping aspect ratio
     Arena arena = { 0 };
+    UserInputState inpSt = { 0 };
+    State st = { 0 };
+    
+    SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
+
     CreateArena(&arena, 400);
     assert(arena.err == false);
-    
-    State st = { 0 };
-    InitState(&st, &arena);
+
+    st.inpState = &inpSt;
+    st.currAppState = RUNNING;
+    InitMap(&st.map, &arena);
+    InitPlayer(&st.player, st.map);
+    InitCamera(&st.camera, &st.player);
 
     PlayMusicStream(st.map.bgMusic);
     
