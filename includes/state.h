@@ -2,7 +2,9 @@
 #define STATE_H
 
 #include <stdint.h>
+
 #include "raylib.h"
+#include "raymath.h"
 #include "player.h"
 #include "map.h"
 

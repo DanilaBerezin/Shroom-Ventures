@@ -32,7 +32,7 @@ int main(void) {
     RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
    	
-   	// Initializing arena allocator	
+	// Initializing arena allocator	
 	Arena arena = { 0 };
 	CreateArena(&arena, 400);
 	assert(arena.err == false);

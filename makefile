@@ -6,6 +6,7 @@ CFLAGS += -std=gnu99
 CFLAGS += -L$(RAYLIB_INSTALL)/lib
 CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes
+# -MD automatically creates make rules for each header dependency
 CFLAGS += -MD
 CFLAGS += $(CONFIG)
 CFILES := $(wildcard ./src/*.c)
@@ -28,10 +29,8 @@ $(TARGET): $(OBJS)
 ./bin/%.o: ./src/%.c 
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+# Import those header make rules so that we rebuild the correct things if we modify headers
 -include $(DEPS)
-# Automatic dependency management for headers
-#./bin/%.d: ./src/%.c
-#	$(CC) -M $(CFLAGS) $< > $@
 
 clean: 
 	-@rm -f $(TARGET) $(OBJS) $(DEPS)
