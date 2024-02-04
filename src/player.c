@@ -1,9 +1,10 @@
 #include "player.h"
 #include "state.h"
+#include "map.h"
 #include "debug.h"
 
-void InitPlayer(Player *play, Platform *mapPlats) {
-	Platform gnd = mapPlats[0];
+void InitPlayer(Player *play, Map map) {
+	Platform gnd = map.mapPlats[0];
 
     play->pos.x = 400;
     play->pos.y = gnd.rect.y - 50;
@@ -29,6 +30,8 @@ Rectangle HitBox(Player *play) {
 
 Player NextPlayer(State *st) {
     Player nextPlay = { 0 };
+    Map map = st->map;
+
     nextPlay.width = st->player.width;
     nextPlay.jumpSound = st->player.jumpSound;
 
@@ -37,14 +40,14 @@ Player NextPlayer(State *st) {
         Platform plat; 
         bool willColl; 
     } colInfo = { 0 };
-    for (uint32_t i = 0; i < st->numPlats; i++) {
+    for (uint32_t i = 0; i < map.numPlats; i++) {
         // Calculate what the next rectangle's position would be assuming no collision happened
         Rectangle currRect = HitBox(&st->player);
         Rectangle nextRect = currRect;
         nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
         
         // Check to see if collisions occur
-        Platform plat = st->mapPlats[i];
+        Platform plat = map.mapPlats[i];
         float currRectBot = currRect.y + currRect.height;
         float platTop = plat.rect.y;
         if (currRectBot <= platTop && CheckCollisionRecs(nextRect, plat.rect)) {

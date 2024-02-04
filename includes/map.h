@@ -20,17 +20,6 @@ typedef struct map {
 	Platform	*mapPlats;
 } Map;
 
-/*
- * TODO: explanation here
- */
-Platform InitPlatforms(
-    float x,
-    float y,
-    float width,
-    float height,
-    bool block,
-    Color color
-);
 
 /*
  * TODO: explanation here

@@ -41,7 +41,7 @@ typedef struct player {
 /*
  * TODO: explanation here
  */
-void InitPlayer(Player *play, Platform *mapPlats);
+void InitPlayer(Player *play, Map map);
 
 /*
  * TODO: explanation here

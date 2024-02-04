@@ -34,10 +34,7 @@ typedef struct state {
     enum AppState   currAppState; 
 
     // World state
-    Texture2D       background;
-    uint32_t        numPlats;
-    Platform        *mapPlats;
-    Music           bgMusic;
+    Map             map;
     Player          player;
     Camera2D        camera;
 } State;

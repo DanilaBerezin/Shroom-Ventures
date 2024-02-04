@@ -22,9 +22,9 @@ int main(void) {
     SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
                                                                 // ESC key
     SetTargetFPS(60);
+    
     //TODO: make app fullscreen by default, make default configurable
 
-    // Audio stuff
     InitAudioDevice();
 
     // Initializing the renderer, this thing allows us to stretch and resize screen while scaling the graphics and 
@@ -40,7 +40,7 @@ int main(void) {
     State st = { 0 };
     InitState(&st, &arena);
 
-    PlayMusicStream(st.bgMusic);
+    PlayMusicStream(st.map.bgMusic);
     
     // Main game loop
     float accTime = 0;
@@ -106,8 +106,8 @@ int main(void) {
     }
 
     // TODO: get rid of this stuff except for maybe CloseWindow()?
-    UnloadTexture(st.background);
-    UnloadMusicStream(st.bgMusic);
+    UnloadTexture(st.map.bgTexture);
+    UnloadMusicStream(st.map.bgMusic);
     UnloadSound(st.player.jumpSound);
     DestroyArena(&arena);
     UnloadRenderTexture(rendTarg);
