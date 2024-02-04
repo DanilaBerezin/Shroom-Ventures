@@ -2,6 +2,8 @@
 #define CAMERA_H
 
 #include "raylib.h"
+#include "state.h"
+#include "player.h"
 
 /*
  * TODO: explanation here
