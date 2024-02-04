@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "raylib.h"
+#include "map.h"
 
 // In pixels per second
 #define PLAYER_JUMP_SPEED 500.0f
@@ -37,11 +38,25 @@ typedef struct player {
     Sound   jumpSound;
 } Player;
 
+/*
+ * TODO: explanation here
+ */
+void InitPlayer(Player *play, Platform *mapPlats);
+
+/*
+ * TODO: explanation here
+ */
 Rectangle HitBox(Player *play);
 
+/*
+ * TODO: explanation here
+ */
 void PlayPlayerSound(Player *play);
 
-// TODO: make these "Next" functions return void
+/*
+ * TODO: explanation here
+ * TODO: make this return void
+ */
 Player NextPlayer(State *st);
 
 

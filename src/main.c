@@ -1,9 +1,11 @@
 #include <stdint.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "player.h"
 #include "map.h"
 #include "state.h"
+#include "arena.h"
 #include "debug.h"
 #include "macros.h"
 
@@ -29,61 +31,15 @@ int main(void) {
     // maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
-    
-    // Initializing state
-    State st = { 0 };
+   	
+   	// Initializing arena allocator	
+	Arena arena = { 0 };
+	CreateArena(&arena, 400);
+	assert(arena.err == false);
 
-    // User input state
-    // TODO: use an arena allocator for all these pointers and create an initialization
-    // function
-    UserInputState inpSt = { 0 };
+	State st = { 0 };
+    InitState(&st, &arena);
 
-    // Load background texture
-    st.background = LoadTexture("assets/bg0.png");
-    
-    // Load background music
-    st.bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
-    
-    // Map platforms
-    Platform mapPlats[] = { InitPlatforms(-6000, 320, 13000, 8000, true, BROWN),
-                           InitPlatforms(650, 200, 100, 10, true, BROWN),
-                           InitPlatforms(250, 200, 100, 10, true, BROWN),
-                           InitPlatforms(300, 100, 400, 10, true, BROWN), };
-    Platform gnd = mapPlats[0];
-
-    // Player
-    Player play = { 0 };
-    play.pos.x = 400;
-    play.pos.y = gnd.rect.y - 50;
-    play.width = 40; 
-    play.height = PLAYER_DEFAULT_HEIGHT;
-    play.vel.y = 0.0f;
-    play.isCrouch = false;
-    play.isDash = false;
-    play.dashTime = 0.0f;
-    play.walkTime = 0.0f;
-    play.playJumpSound = false;
-    play.jumpSound = LoadSound("assets/jump.wav");
-
-    // Camera
-    Camera2D cam = { 0 };
-    cam.target.x = play.pos.x;
-    cam.target.y = 0;
-    // By default, the camera will position the target at the upper left hand corner (the origin), 
-    // this offset allows you to move the camera so that it is centered on the target 
-    cam.offset.x = (float) GAME_WIDTH / 2.0f;
-    cam.offset.y = (float) GAME_HEIGHT / 2.0f;
-    cam.rotation = 0.0f;
-    cam.zoom = 1.0f;
-
-    // Setting the state
-    st.inpState = &inpSt;
-    st.currAppState = RUNNING;
-    st.numPlats = ARRAY_SIZE(mapPlats);
-    st.mapPlats = mapPlats;
-    st.player = play;
-    st.camera = cam;
-    
     PlayMusicStream(st.bgMusic);
     
     // Main game loop
@@ -149,12 +105,12 @@ int main(void) {
         EndDrawing();
     }
 
-    // Tear-Down env
     // TODO: get rid of this stuff except for maybe CloseWindow()?
     UnloadTexture(st.background);
-    UnloadRenderTexture(rendTarg);
     UnloadMusicStream(st.bgMusic);
-    UnloadSound(play.jumpSound);
+    UnloadSound(st.player.jumpSound);
+	DestroyArena(&arena);
+    UnloadRenderTexture(rendTarg);
     CloseAudioDevice();
     CloseWindow();
     return 0;

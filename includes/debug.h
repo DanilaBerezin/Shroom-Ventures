@@ -1,11 +1,10 @@
 #ifndef DEBUG_H
 #define DEBUG_G
 
-// WARNING: include this header after ALL header files since it will redefine symbols
-
-#ifdef DEBUG
 #include <stdio.h>
-#endif
+#include <assert.h>
+
+// WARNING: include this header after ALL header files since it will redefine symbols
 
 // Debugging macros
 #ifdef DEBUG

@@ -2,6 +2,22 @@
 #include "state.h"
 #include "debug.h"
 
+void InitPlayer(Player *play, Platform *mapPlats) {
+	Platform gnd = mapPlats[0];
+
+    play->pos.x = 400;
+    play->pos.y = gnd.rect.y - 50;
+    play->width = 40; 
+    play->height = PLAYER_DEFAULT_HEIGHT;
+    play->vel.y = 0.0f;
+    play->isCrouch = false;
+    play->isDash = false;
+    play->dashTime = 0.0f;
+    play->walkTime = 0.0f;
+    play->playJumpSound = false;
+    play->jumpSound = LoadSound("assets/jump.wav");
+}
+
 Rectangle HitBox(Player *play) {
     Rectangle hitbox = { 0 };
     hitbox.x = play->pos.x;

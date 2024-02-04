@@ -1,7 +1,40 @@
-#include "state.h"
+#include <string.h>
 #include "raymath.h"
+#include "arena.h"
+#include "state.h"
+#include "camera.h"
 #include "debug.h"
 #include "macros.h"
+
+void InitState(State *st, Arena *arena) {
+	// Map Initialization
+	Platform *mapPlats = ArenaAlloc(arena, 4 * sizeof(mapPlats[0]));
+	mapPlats[0] = InitPlatforms(-6000, 320, 13000, 8000, true, BROWN);
+	mapPlats[1] = InitPlatforms(650, 200, 100, 10, true, BROWN);
+	mapPlats[2] = InitPlatforms(250, 200, 100, 10, true, BROWN);
+	mapPlats[3] = InitPlatforms(300, 100, 400, 10, true, BROWN);
+
+    // Player Initialization
+    Player play = { 0 };
+	InitPlayer(&play, mapPlats);
+    
+	// Camera
+    Camera2D cam = { 0 };
+    InitCamera(&cam, &play);
+	
+	// Initializing state
+	UserInputState *inpSt = ArenaAlloc(arena, sizeof(*inpSt));
+	memset(inpSt, 0, sizeof(*inpSt));
+
+	st->inpState = inpSt;
+    st->currAppState = RUNNING;
+    st->background = LoadTexture("assets/bg0.png");
+    st->bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
+    st->numPlats = 4;
+    st->mapPlats = mapPlats;
+    st->player = play;
+    st->camera = cam;
+}
 
 State NextSystemState(State *st) {
     State nextSys = *st;
@@ -20,54 +53,6 @@ State NextSystemState(State *st) {
 
     nextSys.inpState->inputRequests = requests;
     return nextSys;
-}
-
-// NOTE: for some reason the smoothing here ends up resulting in a 
-// sort of course grain appearance. Probably something internal to
-// raylib though the devs deny it lol. Funnily enough casting the 
-// values to ints makes it look a bit smoother imo and rounding
-// doesn't seem to make a difference? Oh well I'll tinker with this
-// later
-static Camera2D NextCamera(State *st) {
-    Camera2D nextCam = { 0 };
-    nextCam.rotation = st->camera.rotation;
-    nextCam.zoom = st->camera.zoom;
-
-    // PID smoothing for camera motion when you move left or right
-    const float offsetCoeff = 2.0f;
-    const float maxDiff = 400.0f;
-    float currOffset = st->camera.offset.x;
-    float offsetTarget = (float) GAME_WIDTH / 2.0f;
-    if ((int) st->player.vel.x < 0){
-        offsetTarget +=  maxDiff;
-    } else if ((int) st->player.vel.x > 0){
-        offsetTarget -= maxDiff;
-    } else {
-        offsetTarget = currOffset;
-    }
-
-    float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * DELTA_TIME; 
-    nextCam.offset.y = st->camera.offset.y;
-    
-    // Smoothing for currCam to follow target (player in this case)
-    const float minSpeed = 110;
-    const float minEffectLength = 10;
-    const float fractionSpeed = 3.5f;
-    float diff = st->player.pos.x - st->camera.target.x;
-
-    float length = fabsf(diff);
-    if (length > minEffectLength) {
-        Vector2 adjust = { 0 };
-        adjust.x = diff;
-
-        float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(adjust, speed * DELTA_TIME / length));
-    } else {
-       nextCam.target = st->camera.target;
-    }
-
-    return nextCam;
 }
 
 State NextWorldState(State *st) {

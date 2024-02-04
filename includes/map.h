@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include "raylib.h"
+#include "arena.h"
 
-#define MAX_BUILDINGS 100
 #define G 1000
 
 typedef struct {
@@ -13,6 +13,16 @@ typedef struct {
     Color       color;
 } Platform;
 
+typedef struct map {
+	Texture2D 	bgTexture;
+	Music		bgMusic;
+	uint32_t	numPlats;
+	Platform	*mapPlats;
+} Map;
+
+/*
+ * TODO: explanation here
+ */
 Platform InitPlatforms(
     float x,
     float y,
@@ -21,5 +31,10 @@ Platform InitPlatforms(
     bool block,
     Color color
 );
+
+/*
+ * TODO: explanation here
+ */
+void InitMap(Map *map, Arena *arena);
 
 #endif

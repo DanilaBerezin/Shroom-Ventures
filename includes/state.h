@@ -19,7 +19,7 @@ typedef struct {
     // Internal state
     bool            prevPausePress;
     
-    // Stuff external functionality will care about
+    // This is the thing external functionality will care about
     uint64_t        inputRequests;
 } UserInputState;
 
@@ -40,12 +40,32 @@ typedef struct state {
     Camera2D        camera;
 } State;
 
+
+/*
+ * TODO: explanation here
+ */
+void InitState(State *st, Arena *arena);
+
+/*
+ * TODO: explanation here
+ * TODO: make these return void
+ */
 State NextSystemState(State *st);
 
+/*
+ * TODO: explanation here
+ * TODO: make these return void
+ */
 State NextWorldState(State *st);
 
+/*
+ * TODO: explanation here
+ */
 void DrawWorldState(State *st, RenderTexture2D rendTarg);
 
+/*
+ * TODO: explanation here
+ */
 void PlayWorldStateSound(State *st);
 
 #endif

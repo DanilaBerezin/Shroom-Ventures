@@ -1,3 +1,6 @@
+#ifndef ARENA_H
+#define ARENA_H
+
 #include "stdbool.h"
 #include "stddef.h"
 
@@ -24,3 +27,5 @@ void *ArenaAlloc(Arena *arena, size_t bytes);
  * No check for null ptrs here, your problem if you pass one
  */
 void DestroyArena(Arena *arena);
+
+#endif
