@@ -31,13 +31,13 @@ int main(void) {
     // maintaining aspect ratio
     RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
-   	
-	// Initializing arena allocator	
-	Arena arena = { 0 };
-	CreateArena(&arena, 400);
-	assert(arena.err == false);
-
-	State st = { 0 };
+    
+    // Initializing arena allocator
+    Arena arena = { 0 };
+    CreateArena(&arena, 400);
+    assert(arena.err == false);
+    
+    State st = { 0 };
     InitState(&st, &arena);
 
     PlayMusicStream(st.bgMusic);
@@ -109,7 +109,7 @@ int main(void) {
     UnloadTexture(st.background);
     UnloadMusicStream(st.bgMusic);
     UnloadSound(st.player.jumpSound);
-	DestroyArena(&arena);
+    DestroyArena(&arena);
     UnloadRenderTexture(rendTarg);
     CloseAudioDevice();
     CloseWindow();

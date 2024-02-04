@@ -5,16 +5,16 @@
 #include "macros.h"
 
 void InitState(State *st, Arena *arena) {
-	// Map Initialization
-	Platform *mapPlats = ArenaAlloc(arena, 4 * sizeof(mapPlats[0]));
-	mapPlats[0] = InitPlatforms(-6000, 320, 13000, 8000, true, BROWN);
-	mapPlats[1] = InitPlatforms(650, 200, 100, 10, true, BROWN);
-	mapPlats[2] = InitPlatforms(250, 200, 100, 10, true, BROWN);
-	mapPlats[3] = InitPlatforms(300, 100, 400, 10, true, BROWN);
+    // Map Initialization
+    Platform *mapPlats = ArenaAlloc(arena, 4 * sizeof(mapPlats[0]));
+    mapPlats[0] = InitPlatforms(-6000, 320, 13000, 8000, true, BROWN);
+    mapPlats[1] = InitPlatforms(650, 200, 100, 10, true, BROWN);
+    mapPlats[2] = InitPlatforms(250, 200, 100, 10, true, BROWN);
+    mapPlats[3] = InitPlatforms(300, 100, 400, 10, true, BROWN);
 
     // Player Initialization
     Player play = { 0 };
-	InitPlayer(&play, mapPlats);
+    InitPlayer(&play, mapPlats);
     
 	// Camera
     Camera2D cam = { 0 };
@@ -26,12 +26,12 @@ void InitState(State *st, Arena *arena) {
     cam.offset.y = (float) GAME_HEIGHT / 2.0f;
     cam.rotation = 0.0f;
     cam.zoom = 1.0f;
-	
-	// Initializing state
-	UserInputState *inpSt = ArenaAlloc(arena, sizeof(*inpSt));
-	memset(inpSt, 0, sizeof(*inpSt));
-
-	st->inpState = inpSt;
+    
+    // Initializing state
+    UserInputState *inpSt = ArenaAlloc(arena, sizeof(*inpSt));
+    memset(inpSt, 0, sizeof(*inpSt));
+    
+    st->inpState = inpSt;
     st->currAppState = RUNNING;
     st->background = LoadTexture("assets/bg0.png");
     st->bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
