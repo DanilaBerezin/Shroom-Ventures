@@ -39,12 +39,6 @@ typedef struct state {
     Camera2D        camera;
 } State;
 
-
-/*
- * TODO: explanation here
- */
-void InitState(State *st, Arena *arena);
-
 /*
  * TODO: explanation here
  * TODO: make these return void

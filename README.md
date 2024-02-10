@@ -11,17 +11,21 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 6) ~~Figure out a static background~~
 7) ~~Figure out background soundtrack~~
 8) ~~Figure out sound effects for player~~
-9) Refactor day tomorrow:
-    - Move background and background music into map
-    - Give map and player initializer functions
-    - Give map and player draw functions
-    - Give background play sound function
-9) Figure out animations
-10) Create a startup menu
-11) Figure out basic ai
-12) Load a map (maybe? see how it goes)
-13) ~~Reinstall raylib and link against archive instead of shared library~~
-14) ~~Make makefile configurable and not dependent on my setup~~
+9) ~~Refactor day tomorrow:~~
+    - ~~Move background and background music into map~~
+    - ~~Give map and player initializer functions~~
+    - ~~Give player draw functions~~
+    - ~~Give background play sound function~~
+9) ~~Figure out animations~~
+10) Refactor the code to get rid of the stupid design choice I made to make current
+	every component of current state an explicit function of previous state and 
+	current inputs
+11) Abstract drawing so that sizes of things don't depend on size of display buffer
+12) Create a startup menu
+13) Figure out basic ai
+14) Load a map (maybe? see how it goes)
+15) ~~Reinstall raylib and link against archive instead of shared library~~
+16) ~~Make makefile configurable and not dependent on my setup~~
 
 ## Build instructions
 Currently, I support building on MSYS2 with the mingw64 environment on Windows, and natively on linux. This project does depend on **Raylib** which is a beautiful project and you should please take a moment to [check them out](https://github.com/raysan5/raylib/). Before building Shroom Ventures from source, follow the instructions on Raylibs github repo to build and install the Raylib library on your system.

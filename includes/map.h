@@ -2,6 +2,7 @@
 #define MAP_H
 
 #include <stdint.h>
+
 #include "raylib.h"
 #include "arena.h"
 

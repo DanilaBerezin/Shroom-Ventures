@@ -5,18 +5,6 @@
 #include "debug.h"
 #include "macros.h"
 
-void InitState(State *st, Arena *arena) {
-	// Initializing state
-    UserInputState *inpSt = ArenaAlloc(arena, sizeof(*inpSt));
-    memset(inpSt, 0, sizeof(*inpSt));
-    
-    st->inpState = inpSt;
-    st->currAppState = RUNNING;
-    InitMap(&st->map, arena);
-    InitPlayer(&st->player, st->map);
-    InitCamera(&st->camera, &st->player);
-}
-
 State NextSystemState(State *st) {
     State nextSys = *st;
     nextSys.frameTime = GetFrameTime();
@@ -61,7 +49,7 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
                 DrawRectangleRec(map.mapPlats[i].rect, map.mapPlats[i].color);
             }
             
-            DrawRectangleRec(HitBox(&st->player), RED); 
+            DrawPlayer(&st->player);
         EndMode2D();
 
         DrawText("Move rectangle with doom keys", 10, 10, 30, BLACK);
@@ -69,8 +57,6 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 }
 
 void PlayWorldStateSound(State *st) {
-    Map map = st->map;
-
-    UpdateMusicStream(map.bgMusic);
+    UpdateMusicStream(st->map.bgMusic);
     PlayPlayerSound(&st->player);
 }

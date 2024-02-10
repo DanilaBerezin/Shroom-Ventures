@@ -3,6 +3,19 @@
 #include "map.h"
 #include "debug.h"
 
+// In pixels per second
+#define PLAYER_JUMP_SPEED 500.0f
+#define PLAYER_HOR_SPEED 500.0f
+#define PLAYER_DASH_SPEED 800.0f
+
+// In pixels
+#define PLAYER_DEFAULT_HEIGHT 40
+
+// In seconds
+#define MAX_DASH_TIME 0.15f
+#define DASH_COOL_DOWN_TIME 1.0f
+#define FRAME_TIME 0.2f
+
 void InitPlayer(Player *play, Map map) {
 	Platform gnd = map.mapPlats[0];
 
@@ -15,12 +28,14 @@ void InitPlayer(Player *play, Map map) {
     play->isDash = false;
     play->dashTime = 0.0f;
     play->walkTime = 0.0f;
+    play->frames = LoadTexture("assets/player_frames.png");
     play->playJumpSound = false;
     play->jumpSound = LoadSound("assets/jump.wav");
 }
 
 Rectangle HitBox(Player *play) {
     Rectangle hitbox = { 0 };
+
     hitbox.x = play->pos.x;
     hitbox.y = play->pos.y;
     hitbox.height = play->height;
@@ -34,6 +49,7 @@ Player NextPlayer(State *st) {
 
     nextPlay.width = st->player.width;
     nextPlay.jumpSound = st->player.jumpSound;
+    nextPlay.frames = st->player.frames;
 
     // Check for collisions
     struct { 
@@ -46,7 +62,7 @@ Player NextPlayer(State *st) {
         Rectangle nextRect = currRect;
         nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
         
-        // Check to see if collisions occur
+        // Check to see if collisions occurs
         Platform plat = map.mapPlats[i];
         float currRectBot = currRect.y + currRect.height;
         float platTop = plat.rect.y;
@@ -62,7 +78,7 @@ Player NextPlayer(State *st) {
         nextPlay.isDash = false;
         nextPlay.dashTime = 0.0f;
     } else if (!st->player.isDash && IsKeyDown(KEY_LEFT_SHIFT)
-                                && st->player.walkTime > DASH_COOL_DOWN_TIME) {
+                                  && st->player.walkTime > DASH_COOL_DOWN_TIME) {
         nextPlay.isDash = true;
         nextPlay.dashTime = st->player.dashTime;
     } else if (st->player.isDash) {
@@ -135,7 +151,25 @@ Player NextPlayer(State *st) {
         nextPlay.isCrouch = st->player.isCrouch;
     }
 
+    // Very simple implementation for now
+    if (nextPlay.vel.x != 0) {
+        nextPlay.animTime = fmodf(st->player.animTime + DELTA_TIME, 1.0f);
+    }
+
     return nextPlay;
+}
+
+void DrawPlayer(Player *play) {
+    uint32_t currFrame = (uint32_t) (play->animTime / FRAME_TIME);
+    uint32_t frameWidth = (uint32_t) play->frames.width / 5;
+    Rectangle src, dest = HitBox(play);
+    Vector2 origin = { 0 };
+    
+    src.x = frameWidth * currFrame; 
+    src.y = 0;
+    src.height = play->frames.height;
+    src.width = frameWidth;
+    DrawTexturePro(play->frames, src, dest, origin, 0, WHITE);
 }
 
 void PlayPlayerSound(Player *play) {

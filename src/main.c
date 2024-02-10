@@ -14,13 +14,13 @@
 int main(void) {
     // Initializing application stuff 
     // TODO: add these to compile time constants
-    const int windowWidth = 800;
-    const int windowHeight = 450;
+    const int windowWidth = 1600;
+    const int windowHeight = 900;
     
     // Graphics stuff
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
-    SetWindowMinSize(800, 450);
+    SetWindowMinSize(windowWidth, windowHeight);
     SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
                                                                 // ESC key
     SetTargetFPS(60);
@@ -39,13 +39,15 @@ int main(void) {
 
     CreateArena(&arena, 400);
     assert(arena.err == false);
-
+    
+    // TODO: don't make inpSt it's own thing and don't make it a pointer
     st.inpState = &inpSt;
     st.currAppState = RUNNING;
     InitMap(&st.map, &arena);
     InitPlayer(&st.player, st.map);
     InitCamera(&st.camera, &st.player);
-
+    
+    // TODO: put this in InitMap()
     PlayMusicStream(st.map.bgMusic);
     
     // Main game loop
@@ -55,9 +57,8 @@ int main(void) {
         st = NextSystemState(&st);
         switch (st.currAppState) {
         case RUNNING: 
-            // TODO: make this check a generic function
             if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
-                    st.currAppState = PAUSED;
+                st.currAppState = PAUSED;
             }
 
             accTime += st.frameTime;
@@ -72,15 +73,14 @@ int main(void) {
             break;
         case PAUSED:
             if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
-                    st.currAppState = RUNNING;
+                st.currAppState = RUNNING;
             }
             
             // TODO: insert shader here and a pause menu
             break;
         }
 
-       
-        // Update sound here
+        // Sound logic runs regardless of application state
         PlayWorldStateSound(&st);
 
         // This block will draw the texture

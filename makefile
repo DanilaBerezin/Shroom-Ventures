@@ -26,7 +26,7 @@ debug_target: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-./bin/%.o: ./src/%.c 
+./bin/%.o: ./src/%.c config.mk
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # Import those header make rules so that we rebuild the correct things if we modify headers
