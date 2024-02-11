@@ -25,8 +25,8 @@ void InitMap(Map *map, Arena *arena) {
     map->bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
     map->numPlats = 4;
     map->mapPlats = ArenaAlloc(arena, 4 * sizeof(map->mapPlats[0]));
-    map->mapPlats[0] = InitPlatforms(-6000, 320, 13000, 8000, true, BROWN);
-    map->mapPlats[1] = InitPlatforms(650, 200, 100, 10, true, BROWN);
-    map->mapPlats[2] = InitPlatforms(250, 200, 100, 10, true, BROWN);
-    map->mapPlats[3] = InitPlatforms(300, 100, 400, 10, true, BROWN);
+    map->mapPlats[0] = InitPlatforms(-7500, 400, 16250, 1000, true, BROWN);
+    map->mapPlats[1] = InitPlatforms(812, 250, 125, 12, true, BROWN);
+    map->mapPlats[2] = InitPlatforms(312, 250, 125, 12, true, BROWN);
+    map->mapPlats[3] = InitPlatforms(375, 100, 400, 12, true, BROWN);
 }

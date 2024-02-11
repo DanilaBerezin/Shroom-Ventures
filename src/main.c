@@ -35,7 +35,7 @@ int main(void) {
     UserInputState inpSt = { 0 };
     State st = { 0 };
     
-    SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_POINT); 
+    SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_BILINEAR); 
 
     CreateArena(&arena, 400);
     assert(arena.err == false);

@@ -4,12 +4,12 @@
 #include "debug.h"
 
 // In pixels per second
-#define PLAYER_JUMP_SPEED 500.0f
-#define PLAYER_HOR_SPEED 500.0f
-#define PLAYER_DASH_SPEED 800.0f
+#define PLAYER_JUMP_SPEED 600.0f
+#define PLAYER_HOR_SPEED 625.0f
+#define PLAYER_DASH_SPEED 1500.0f
 
 // In pixels
-#define PLAYER_DEFAULT_HEIGHT 40
+#define PLAYER_DEFAULT_HEIGHT 100 
 
 // In seconds
 #define MAX_DASH_TIME 0.15f
@@ -19,9 +19,9 @@
 void InitPlayer(Player *play, Map map) {
 	Platform gnd = map.mapPlats[0];
 
-    play->pos.x = 400;
-    play->pos.y = gnd.rect.y - 50;
-    play->width = 40; 
+    play->pos.x = 500;
+    play->pos.y = gnd.rect.y - 150;
+    play->width = 100; 
     play->height = PLAYER_DEFAULT_HEIGHT;
     play->vel.y = 0.0f;
     play->isCrouch = false;
@@ -40,6 +40,7 @@ Rectangle HitBox(Player *play) {
     hitbox.y = play->pos.y;
     hitbox.height = play->height;
     hitbox.width = play->width;
+
     return hitbox;
 }
 
@@ -59,14 +60,14 @@ Player NextPlayer(State *st) {
     for (uint32_t i = 0; i < map.numPlats; i++) {
         // Calculate what the next rectangle's position would be assuming no collision happened
         Rectangle currRect = HitBox(&st->player);
-        Rectangle nextRect = currRect;
-        nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
+        // Rectangle nextRect = currRect;
+        // nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
         
         // Check to see if collisions occurs
         Platform plat = map.mapPlats[i];
         float currRectBot = currRect.y + currRect.height;
         float platTop = plat.rect.y;
-        if (currRectBot <= platTop && CheckCollisionRecs(nextRect, plat.rect)) {
+        if (fabs(currRectBot - platTop) < 10 && CheckCollisionRecs(currRect, plat.rect)) {
             colInfo.plat = plat;
             colInfo.willColl = true;
             break;
@@ -116,7 +117,8 @@ Player NextPlayer(State *st) {
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
         nextPlay.vel.y = -PLAYER_JUMP_SPEED;
         nextPlay.playJumpSound = true;
-    } else if ((!IsKeyDown(KEY_W) && colInfo.willColl)
+    } else if ((!IsKeyDown(KEY_W) && colInfo.willColl
+                                  && st->player.vel.y >= 0)
                                   || nextPlay.isDash) {
         nextPlay.vel.y = 0;
         nextPlay.playJumpSound = st->player.playJumpSound;
@@ -129,7 +131,7 @@ Player NextPlayer(State *st) {
     nextPlay.pos.x = st->player.pos.x + nextPlay.vel.x * DELTA_TIME;
 
     // Calculate y-component of position. Coupled to y-component of velocity. 
-    if (colInfo.willColl) {
+    if (colInfo.willColl && nextPlay.vel.y >= 0) {
         Platform colPlat = colInfo.plat;
         nextPlay.pos.y = colPlat.rect.y - st->player.height;
     } else {
@@ -168,7 +170,12 @@ void DrawPlayer(Player *play) {
     src.x = frameWidth * currFrame; 
     src.y = 0;
     src.height = play->frames.height;
-    src.width = frameWidth;
+    if (play->vel.x >= 0) {
+        src.width = frameWidth;
+    } else {
+        src.width = -((int32_t) frameWidth);
+    }
+
     DrawTexturePro(play->frames, src, dest, origin, 0, WHITE);
 }
 
