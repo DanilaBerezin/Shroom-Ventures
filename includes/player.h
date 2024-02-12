@@ -42,9 +42,8 @@ Rectangle HitBox(Player *play);
 
 /*
  * TODO: explanation here
- * TODO: make this return void
  */
-Player NextPlayer(State *st);
+void NextPlayer(State *st);
 
 /*
  * TODO: explanation here

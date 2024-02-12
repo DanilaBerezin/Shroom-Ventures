@@ -24,11 +24,9 @@ State NextSystemState(State *st) {
     return nextSys;
 }
 
-
-
 State NextWorldState(State *st) {
     State nextWorld = *st;
-    nextWorld.player = NextPlayer(&nextWorld);
+    NextPlayer(&nextWorld);
     nextWorld.camera = NextCamera(&nextWorld);
     return nextWorld;
 }

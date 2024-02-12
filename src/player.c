@@ -44,13 +44,9 @@ Rectangle HitBox(Player *play) {
     return hitbox;
 }
 
-Player NextPlayer(State *st) {
-    Player nextPlay = { 0 };
+void NextPlayer(State *st) {
+    Player currPlay = st->player;
     Map map = st->map;
-
-    nextPlay.width = st->player.width;
-    nextPlay.jumpSound = st->player.jumpSound;
-    nextPlay.frames = st->player.frames;
 
     // Check for collisions
     struct { 
@@ -59,9 +55,9 @@ Player NextPlayer(State *st) {
     } colInfo = { 0 };
     for (uint32_t i = 0; i < map.numPlats; i++) {
         // Calculate what the next rectangle's position would be assuming no collision happened
-        Rectangle currRect = HitBox(&st->player);
+        Rectangle currRect = HitBox(&currPlay);
         // Rectangle nextRect = currRect;
-        // nextRect.y = currRect.y + (st->player.vel.y + G * DELTA_TIME) * DELTA_TIME;
+        // nextRect.y = currRect.y + (currPlay.vel.y + G * DELTA_TIME) * DELTA_TIME;
         
         // Check to see if collisions occurs
         Platform plat = map.mapPlats[i];
@@ -75,90 +71,77 @@ Player NextPlayer(State *st) {
     }
 
     // Dash state logic
-    if (st->player.isDash && st->player.dashTime + DELTA_TIME > MAX_DASH_TIME) {
-        nextPlay.isDash = false;
-        nextPlay.dashTime = 0.0f;
-    } else if (!st->player.isDash && IsKeyDown(KEY_LEFT_SHIFT)
-                                  && st->player.walkTime > DASH_COOL_DOWN_TIME) {
-        nextPlay.isDash = true;
-        nextPlay.dashTime = st->player.dashTime;
-    } else if (st->player.isDash) {
-        nextPlay.isDash = st->player.isDash;
-        nextPlay.dashTime = st->player.dashTime + DELTA_TIME;
-    } else {
-        nextPlay.isDash = st->player.isDash;
-        nextPlay.dashTime = st->player.dashTime;
-    }
+    if (currPlay.dashTime + DELTA_TIME > MAX_DASH_TIME) {
+        st->player.isDash = false;
+        st->player.dashTime = 0.0f;
+    } else if (IsKeyDown(KEY_LEFT_SHIFT) && currPlay.walkTime > DASH_COOL_DOWN_TIME) {
+        st->player.isDash = true;
+        st->player.dashTime = currPlay.dashTime;
+    } else if (currPlay.isDash) {
+        st->player.dashTime = currPlay.dashTime + DELTA_TIME;
+    } 
 
     // Determine x-component of speed
     float xSpeed;
-    if (nextPlay.isDash && !st->player.isCrouch) {
-        nextPlay.walkTime = 0.0f;
+    if (st->player.isDash && !currPlay.isCrouch) {
+        st->player.walkTime = 0.0f;
         xSpeed = PLAYER_DASH_SPEED;
     } else {
         xSpeed = PLAYER_HOR_SPEED;
-        nextPlay.walkTime = st->player.walkTime + DELTA_TIME;
+        st->player.walkTime = currPlay.walkTime + DELTA_TIME;
     }
 
     // Calculate x-component of velocity, coupled with dash state logic
-    if (nextPlay.isDash && st->player.isDash) {
-        nextPlay.vel.x = st->player.vel.x;
+    if (st->player.isDash && currPlay.isDash) {
+        st->player.vel.x = currPlay.vel.x;
     } else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
-        nextPlay.vel.x = -xSpeed;
+        st->player.vel.x = -xSpeed;
     } else if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
-        nextPlay.vel.x = xSpeed;
+        st->player.vel.x = xSpeed;
     } else if (!IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
-        nextPlay.vel.x = 0;
-    } else {
-        nextPlay.vel.x = st->player.vel.x;
-    }
+        st->player.vel.x = 0;
+    } 
 
     // Calculate y-component of velocity, coupled with dash state logic as well
     if (IsKeyDown(KEY_W) && colInfo.willColl) {
-        nextPlay.vel.y = -PLAYER_JUMP_SPEED;
-        nextPlay.playJumpSound = true;
-    } else if ((!IsKeyDown(KEY_W) && colInfo.willColl
-                                  && st->player.vel.y >= 0)
-                                  || nextPlay.isDash) {
-        nextPlay.vel.y = 0;
-        nextPlay.playJumpSound = st->player.playJumpSound;
+        st->player.vel.y = -PLAYER_JUMP_SPEED;
+        st->player.playJumpSound = true;
+    } else if ((colInfo.willColl && 
+                currPlay.vel.y >= 0) || 
+                st->player.isDash) {
+        st->player.vel.y = 0;
     } else {
-        nextPlay.vel.y = st->player.vel.y + G * DELTA_TIME;
-        nextPlay.playJumpSound = st->player.playJumpSound;
+        st->player.vel.y = currPlay.vel.y + G * DELTA_TIME;
     }
 
     // Calculate x-component of position. Coupled to x-component of velocity
-    nextPlay.pos.x = st->player.pos.x + nextPlay.vel.x * DELTA_TIME;
+    st->player.pos.x = currPlay.pos.x + st->player.vel.x * DELTA_TIME;
 
     // Calculate y-component of position. Coupled to y-component of velocity. 
-    if (colInfo.willColl && nextPlay.vel.y >= 0) {
+    if (colInfo.willColl && st->player.vel.y >= 0) {
         Platform colPlat = colInfo.plat;
-        nextPlay.pos.y = colPlat.rect.y - st->player.height;
+        st->player.pos.y = colPlat.rect.y - currPlay.height;
     } else {
-        nextPlay.pos.y = st->player.pos.y + nextPlay.vel.y * DELTA_TIME;
+        st->player.pos.y = currPlay.pos.y + st->player.vel.y * DELTA_TIME;
     }
 
     // Crouch logic changed y-position, so is unfortunately coupled to y-position
     // calculations and has to be run after y-position is calculated
     float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2;
-    if (IsKeyDown(KEY_LEFT_CONTROL) && !st->player.isCrouch) { 
-        nextPlay.pos.y = nextPlay.pos.y + crouchHeight;
-        nextPlay.height = crouchHeight;
-        nextPlay.isCrouch = true;
-    } else if (!IsKeyDown(KEY_LEFT_CONTROL) && st->player.isCrouch) {
-        nextPlay.pos.y = nextPlay.pos.y - crouchHeight;
-        nextPlay.height = PLAYER_DEFAULT_HEIGHT;
-    } else {
-        nextPlay.height = st->player.height;
-        nextPlay.isCrouch = st->player.isCrouch;
-    }
+    if (IsKeyDown(KEY_LEFT_CONTROL) && !currPlay.isCrouch) { 
+        st->player.pos.y = st->player.pos.y + crouchHeight;
+        st->player.height = crouchHeight;
+        st->player.isCrouch = true;
+    } else if (!IsKeyDown(KEY_LEFT_CONTROL) && currPlay.isCrouch) {
+        st->player.pos.y = st->player.pos.y - crouchHeight;
+        st->player.height = PLAYER_DEFAULT_HEIGHT;
+        st->player.isCrouch = false;
+    } 
 
     // Very simple implementation for now
-    if (nextPlay.vel.x != 0) {
-        nextPlay.animTime = fmodf(st->player.animTime + DELTA_TIME, 1.0f);
+    if (st->player.vel.x != 0) {
+        st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, 1.0f);
     }
-
-    return nextPlay;
 }
 
 void DrawPlayer(Player *play) {
