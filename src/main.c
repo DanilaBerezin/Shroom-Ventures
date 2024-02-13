@@ -54,7 +54,7 @@ int main(void) {
     float accTime = 0;
     while (!WindowShouldClose()){
         // Fixed time step implementation, doesn't handle death-spiral case
-        st = NextSystemState(&st);
+        NextSystemState(&st);
         switch (st.currAppState) {
         case RUNNING: 
             if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
@@ -64,7 +64,7 @@ int main(void) {
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
-                st = NextWorldState(&st);
+                NextWorldState(&st);
                 accTime -= DELTA_TIME;
             }
 

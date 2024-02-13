@@ -5,9 +5,8 @@
 #include "debug.h"
 #include "macros.h"
 
-State NextSystemState(State *st) {
-    State nextSys = *st;
-    nextSys.frameTime = GetFrameTime();
+void NextSystemState(State *st) {
+    st->frameTime = GetFrameTime();
 
     // Request logic begins here
     uint64_t requests = NO_REQUESTS;
@@ -18,17 +17,13 @@ State NextSystemState(State *st) {
     if (currPausePress && !prevPausePress) {
         requests |= PAUSE_UNPAUSE_REQUESTED;
     } 
-    nextSys.inpState->prevPausePress = currPausePress;
-
-    nextSys.inpState->inputRequests = requests;
-    return nextSys;
+    st->inpState->prevPausePress = currPausePress;
+    st->inpState->inputRequests = requests;
 }
 
-State NextWorldState(State *st) {
-    State nextWorld = *st;
-    NextPlayer(&nextWorld);
-    nextWorld.camera = NextCamera(&nextWorld);
-    return nextWorld;
+void NextWorldState(State *st) {
+    NextPlayer(st);
+    NextCamera(st);
 }
 
 void DrawWorldState(State *st, RenderTexture2D rendTarg) {

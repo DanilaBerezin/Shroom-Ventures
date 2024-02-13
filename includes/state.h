@@ -43,13 +43,12 @@ typedef struct state {
  * TODO: explanation here
  * TODO: make these return void
  */
-State NextSystemState(State *st);
+void NextSystemState(State *st);
 
 /*
  * TODO: explanation here
- * TODO: make these return void
  */
-State NextWorldState(State *st);
+void NextWorldState(State *st);
 
 /*
  * TODO: explanation here

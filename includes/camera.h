@@ -12,8 +12,7 @@ void InitCamera(Camera2D *cam, Player *play);
 
 /*
  * TODO: explanation here
- * TODO: make this a void function
  */
-Camera2D NextCamera(State *st);
+void NextCamera(State *st);
 
 #endif

@@ -21,16 +21,15 @@ void InitCamera(Camera2D *cam, Player *play) {
  * doesn't seem to make a difference? Oh well I'll tinker with this
  * later
  */
-Camera2D NextCamera(State *st) {
-    Camera2D nextCam = { 0 };
-    nextCam.rotation = st->camera.rotation;
-    nextCam.zoom = st->camera.zoom;
+void NextCamera(State *st) {
+    Camera2D currCam = st->camera;
 
     // PID smoothing for camera motion when you move left or right
     const float offsetCoeff = 2.0f;
     const float maxDiff = 400.0f;
-    float currOffset = st->camera.offset.x;
+    float currOffset = currCam.offset.x;
     float offsetTarget = (float) GAME_WIDTH / 2.0f;
+
     if ((int) st->player.vel.x < 0){
         offsetTarget +=  maxDiff;
     } else if ((int) st->player.vel.x > 0){
@@ -40,25 +39,21 @@ Camera2D NextCamera(State *st) {
     }
 
     float offSpeed = (offsetTarget - currOffset) * offsetCoeff;
-    nextCam.offset.x = currOffset + offSpeed * DELTA_TIME; 
-    nextCam.offset.y = st->camera.offset.y;
+    st->camera.offset.x = currOffset + offSpeed * DELTA_TIME; 
+    st->camera.offset.y = currCam.offset.y;
     
     // Smoothing for currCam to follow target (player in this case)
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
-    float diff = st->player.pos.x - st->camera.target.x;
+    float diff = st->player.pos.x - currCam.target.x;
 
     float length = fabsf(diff);
     if (length > minEffectLength) {
         Vector2 adjust = { 0 };
-        adjust.x = diff;
-
         float speed = fmaxf(fractionSpeed * length, minSpeed);
-        nextCam.target = Vector2Add(st->camera.target, Vector2Scale(adjust, speed * DELTA_TIME / length));
-    } else {
-       nextCam.target = st->camera.target;
-    }
 
-    return nextCam;
+        adjust.x = diff;
+        st->camera.target = Vector2Add(currCam.target, Vector2Scale(adjust, speed * DELTA_TIME / length));
+    } 
 }
