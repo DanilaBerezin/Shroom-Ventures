@@ -21,11 +21,6 @@ void NextSystemState(State *st) {
     st->inpState->inputRequests = requests;
 }
 
-void NextWorldState(State *st) {
-    NextPlayer(st);
-    NextCamera(st);
-}
-
 void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 	BeginTextureMode(rendTarg);
         ClearBackground(RAYWHITE);
@@ -49,7 +44,3 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
     EndTextureMode();
 }
 
-void PlayWorldStateSound(State *st) {
-    UpdateMusicStream(st->map.bgMusic);
-    PlayPlayerSound(&st->player);
-}

@@ -64,7 +64,9 @@ int main(void) {
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
-                NextWorldState(&st);
+                NextPlayer(&st);
+                NextCamera(&st);
+
                 accTime -= DELTA_TIME;
             }
 
@@ -81,7 +83,8 @@ int main(void) {
         }
 
         // Sound logic runs regardless of application state
-        PlayWorldStateSound(&st);
+        UpdateMusicStream(st.map.bgMusic);
+        PlayPlayerSound(&st.player);
 
         // This block will draw the texture
         BeginDrawing();

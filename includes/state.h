@@ -48,16 +48,6 @@ void NextSystemState(State *st);
 /*
  * TODO: explanation here
  */
-void NextWorldState(State *st);
-
-/*
- * TODO: explanation here
- */
 void DrawWorldState(State *st, RenderTexture2D rendTarg);
-
-/*
- * TODO: explanation here
- */
-void PlayWorldStateSound(State *st);
 
 #endif
