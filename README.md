@@ -17,7 +17,7 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
     - ~~Give player draw functions~~
     - ~~Give background play sound function~~
 9) ~~Figure out animations~~
-10) Redesign collision logic
+10) ~~Redesign collision logic~~
 11) ~~Refactor the code to get rid of the stupid design choice I made to make current
 	every component of current state an explicit function of previous state and 
 	current inputs~~
