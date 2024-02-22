@@ -61,9 +61,9 @@ void NextPlayer(State *st) {
         
         // Check to see if collisions occurs
         Platform plat = map.mapPlats[i];
-        float currRectBot = currRect.y + currRect.height;
-        float platTop = plat.rect.y;
-        if (fabs(currRectBot - platTop) < 10 && CheckCollisionRecs(currRect, plat.rect)) {
+        // float currRectBot = currRect.y + currRect.height;
+        // float platTop = plat.rect.y;
+        if (CheckCollisionRecs(currRect, plat.rect)) {
             colInfo.plat = plat;
             colInfo.willColl = true;
             break;
@@ -102,13 +102,20 @@ void NextPlayer(State *st) {
         st->player.vel.x = 0;
     } 
 
+    // Logic to determine if we need to snap player to a platform
+    bool snapPlayer = false;
+    if (colInfo.willColl) {
+        float prevYPos = currPlay.pos.y - currPlay.vel.y * DELTA_TIME;
+        float prevPlayBot = prevYPos + currPlay.height;
+        float platTop = colInfo.plat.rect.y;
+        snapPlayer = (prevPlayBot <= platTop);
+    }
+
     // Calculate y-component of velocity, coupled with dash state logic as well
-    if (IsKeyDown(KEY_W) && colInfo.willColl) {
+    if (IsKeyDown(KEY_W) && snapPlayer) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
         st->player.playJumpSound = true;
-    } else if ((colInfo.willColl && 
-                currPlay.vel.y >= 0) || 
-                st->player.isDash) {
+    } else if (snapPlayer || st->player.isDash) {
         st->player.vel.y = 0;
     } else {
         st->player.vel.y = currPlay.vel.y + G * DELTA_TIME;
@@ -118,7 +125,7 @@ void NextPlayer(State *st) {
     st->player.pos.x = currPlay.pos.x + st->player.vel.x * DELTA_TIME;
 
     // Calculate y-component of position. Coupled to y-component of velocity. 
-    if (colInfo.willColl && st->player.vel.y >= 0) {
+    if (snapPlayer && st->player.vel.y >= 0) {
         Platform colPlat = colInfo.plat;
         st->player.pos.y = colPlat.rect.y - currPlay.height;
     } else {
