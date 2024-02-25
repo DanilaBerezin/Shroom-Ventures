@@ -1,10 +1,12 @@
+#include <math.h>
+
 #include "player.h"
 #include "state.h"
 #include "map.h"
 #include "debug.h"
 
 // In pixels per second
-#define PLAYER_JUMP_SPEED 600.0f
+#define PLAYER_JUMP_SPEED 550.0f
 #define PLAYER_HOR_SPEED 625.0f
 #define PLAYER_DASH_SPEED 1500.0f
 
@@ -45,8 +47,9 @@ Rectangle HitBox(Player *play) {
 }
 
 void NextPlayer(State *st) {
+    const Map map = st->map;
+    const UserInputState *inpState = st->inpState;
     Player currPlay = st->player;
-    Map map = st->map;
 
     // Check for collisions
     struct { 
@@ -54,15 +57,10 @@ void NextPlayer(State *st) {
         bool willColl; 
     } colInfo = { 0 };
     for (uint32_t i = 0; i < map.numPlats; i++) {
-        // Calculate what the next rectangle's position would be assuming no collision happened
         Rectangle currRect = HitBox(&currPlay);
-        // Rectangle nextRect = currRect;
-        // nextRect.y = currRect.y + (currPlay.vel.y + G * DELTA_TIME) * DELTA_TIME;
+        Platform plat = map.mapPlats[i];
         
         // Check to see if collisions occurs
-        Platform plat = map.mapPlats[i];
-        // float currRectBot = currRect.y + currRect.height;
-        // float platTop = plat.rect.y;
         if (CheckCollisionRecs(currRect, plat.rect)) {
             colInfo.plat = plat;
             colInfo.willColl = true;
@@ -112,10 +110,12 @@ void NextPlayer(State *st) {
     }
 
     // Calculate y-component of velocity, coupled with dash state logic as well
-    if (IsKeyDown(KEY_W) && snapPlayer) {
+    // TODO: use player state to determine whether a jump can occur isntead
+    if ((inpState->inputRequests & JUMP_REQUESTED) && 
+        fabs(currPlay.vel.y) <= G * DELTA_TIME) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
         st->player.playJumpSound = true;
-    } else if (snapPlayer || st->player.isDash) {
+    } else if (snapPlayer || currPlay.isDash) {
         st->player.vel.y = 0;
     } else {
         st->player.vel.y = currPlay.vel.y + G * DELTA_TIME;

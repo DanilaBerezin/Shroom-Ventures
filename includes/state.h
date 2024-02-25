@@ -16,10 +16,13 @@ enum AppState {
 // TODO: add requests for every other behavior in the game so far
 #define NO_REQUESTS             (0)
 #define PAUSE_UNPAUSE_REQUESTED (1)
+#define JUMP_REQUESTED          (2)
+
 
 typedef struct {
     // Internal state
     bool            prevPausePress;
+    bool            prevJumpPress;
     
     // This is the thing external functionality will care about
     uint64_t        inputRequests;

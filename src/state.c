@@ -18,6 +18,16 @@ void NextSystemState(State *st) {
         requests |= PAUSE_UNPAUSE_REQUESTED;
     } 
     st->inpState->prevPausePress = currPausePress;
+
+    // Jump request logic
+    bool currJumpPress = IsKeyDown(KEY_W);
+    bool prevJumpPress = st->inpState->prevJumpPress;
+    if (currJumpPress && !prevJumpPress) {
+        requests |= JUMP_REQUESTED;
+    } 
+    st->inpState->prevJumpPress = currJumpPress;
+
+
     st->inpState->inputRequests = requests;
 }
 
