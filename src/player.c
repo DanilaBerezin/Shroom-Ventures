@@ -6,7 +6,7 @@
 #include "debug.h"
 
 // In pixels per second
-#define PLAYER_JUMP_SPEED 550.0f
+#define PLAYER_JUMP_SPEED 670.0f
 #define PLAYER_HOR_SPEED 625.0f
 #define PLAYER_DASH_SPEED 1500.0f
 
@@ -25,6 +25,7 @@ void InitPlayer(Player *play, Map map) {
     play->pos.y = gnd.rect.y - 150;
     play->width = 100; 
     play->height = PLAYER_DEFAULT_HEIGHT;
+    play->vel.x = 0.0f;
     play->vel.y = 0.0f;
     play->isCrouch = false;
     play->isDash = false;
@@ -90,12 +91,15 @@ void NextPlayer(State *st) {
     }
 
     // Calculate x-component of velocity, coupled with dash state logic
+    // Also determines player direction
     if (st->player.isDash && currPlay.isDash) {
         st->player.vel.x = currPlay.vel.x;
     } else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
         st->player.vel.x = -xSpeed;
+        st->player.dir = FACING_LEFT;
     } else if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
         st->player.vel.x = xSpeed;
+        st->player.dir = FACING_RIGHT;
     } else if (!IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
         st->player.vel.x = 0;
     } 
@@ -110,7 +114,7 @@ void NextPlayer(State *st) {
     }
 
     // Calculate y-component of velocity, coupled with dash state logic as well
-    // TODO: use player state to determine whether a jump can occur isntead
+    // TODO: use player state to determine whether a jump can occur instead
     if ((inpState->inputRequests & JUMP_REQUESTED) && 
         fabs(currPlay.vel.y) <= G * DELTA_TIME) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
@@ -160,7 +164,7 @@ void DrawPlayer(Player *play) {
     src.x = frameWidth * currFrame; 
     src.y = 0;
     src.height = play->frames.height;
-    if (play->vel.x >= 0) {
+    if (play->dir == FACING_RIGHT) {
         src.width = frameWidth;
     } else {
         src.width = -((int32_t) frameWidth);

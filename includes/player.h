@@ -8,12 +8,18 @@
 // Typedef to avoid circular dependency between state.h and player.h
 typedef struct state State;
 
+typedef enum {
+    FACING_LEFT,
+    FACING_RIGHT
+} PlayerDir;
+
 typedef struct player {
     // Physics
     Vector2     pos;
     Vector2     vel;
     float       width;
     float       height;
+    PlayerDir   dir;
 
     // Internal state
     bool        isCrouch;
