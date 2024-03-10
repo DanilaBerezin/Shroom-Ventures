@@ -27,16 +27,20 @@ void InitPlayer(Player *play, Map map) {
     play->height = PLAYER_DEFAULT_HEIGHT;
     play->vel.x = 0.0f;
     play->vel.y = 0.0f;
+
     play->isCrouch = false;
     play->isDash = false;
     play->dashTime = 0.0f;
     play->walkTime = 0.0f;
+
+    play->animTime = 0;
     play->frames = LoadTexture("assets/player_frames.png");
+
     play->playJumpSound = false;
     play->jumpSound = LoadSound("assets/jump.wav");
 }
 
-Rectangle HitBox(Player *play) {
+Rectangle HitBox(const Player *play) {
     Rectangle hitbox = { 0 };
 
     hitbox.x = play->pos.x;
@@ -49,8 +53,7 @@ Rectangle HitBox(Player *play) {
 
 void NextPlayer(State *st) {
     const Map map = st->map;
-    const UserInputState *inpState = st->inpState;
-    Player currPlay = st->player;
+    const Player currPlay = st->player;
 
     // Check for collisions
     struct { 
@@ -115,7 +118,7 @@ void NextPlayer(State *st) {
 
     // Calculate y-component of velocity, coupled with dash state logic as well
     // TODO: use player state to determine whether a jump can occur instead
-    if ((inpState->inputRequests & JUMP_REQUESTED) && 
+    if ((st->inputReqs & JUMP_REQ) && 
         fabs(currPlay.vel.y) <= G * DELTA_TIME) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
         st->player.playJumpSound = true;

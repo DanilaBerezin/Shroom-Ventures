@@ -14,27 +14,21 @@ enum AppState {
 };
 
 // TODO: add requests for every other behavior in the game so far
-#define NO_REQUESTS             (0)
-#define PAUSE_UNPAUSE_REQUESTED (1)
-#define JUMP_REQUESTED          (2)
-
-
-typedef struct {
-    // Internal state
-    bool            prevPausePress;
-    bool            prevJumpPress;
-    
-    // This is the thing external functionality will care about
-    uint64_t        inputRequests;
-} UserInputState;
+#define NO_REQ                  (0)
+#define TOGGLE_PAUSE_REQ        (0x1UL << 0)
+#define JUMP_REQ                (0x1UL << 1)
+#define TOGGLE_FULLSCREEN_REQ   (0x1UL << 2)
 
 typedef struct state {
     // System state
     float           frameTime;
-    UserInputState  *inpState;
+    uint64_t        inputReqs;
 
     // Application state
     enum AppState   currAppState; 
+    bool            isFullscreen;
+    int             prevScreenWidth;
+    int             prevScreenHeight;
 
     // World state
     Map             map;
@@ -44,7 +38,6 @@ typedef struct state {
 
 /*
  * TODO: explanation here
- * TODO: make these return void
  */
 void NextSystemState(State *st);
 

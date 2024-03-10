@@ -1,8 +1,8 @@
 include config.mk
 
 CC := gcc
-CFLAGS := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
-CFLAGS += -std=gnu99
+CFLAGS := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wpedantic -Wvla
+CFLAGS += -std=c11
 CFLAGS += -L$(RAYLIB_INSTALL)/lib
 CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes

@@ -9,37 +9,33 @@ void NextSystemState(State *st) {
     st->frameTime = GetFrameTime();
 
     // Request logic begins here
-    uint64_t requests = NO_REQUESTS;
+    uint64_t requests = NO_REQ;
     
-    // Pause and unpause request logic
-    bool prevPausePress = st->inpState->prevPausePress;
-    bool currPausePress = IsKeyDown(KEY_ESCAPE);
-    if (currPausePress && !prevPausePress) {
-        requests |= PAUSE_UNPAUSE_REQUESTED;
+    // Toggle pause request logic
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        requests |= TOGGLE_PAUSE_REQ;
     } 
-    st->inpState->prevPausePress = currPausePress;
 
     // Jump request logic
-    bool currJumpPress = IsKeyDown(KEY_W);
-    bool prevJumpPress = st->inpState->prevJumpPress;
-    if (currJumpPress && !prevJumpPress) {
-        requests |= JUMP_REQUESTED;
+    if (IsKeyPressed(KEY_W)) {
+        requests |= JUMP_REQ;
     } 
-    st->inpState->prevJumpPress = currJumpPress;
 
+    // Toggle fullscreen request logic
+    if (IsKeyPressed(KEY_F11)) {
+        requests |= TOGGLE_FULLSCREEN_REQ;
+    }
 
-    st->inpState->inputRequests = requests;
+    st->inputReqs = requests;
 }
 
 void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 	BeginTextureMode(rendTarg);
         ClearBackground(RAYWHITE);
-        
-        Map map = st->map;
 
         // Draw the background
-        Vector2 pos = { 0 };
-        DrawTextureEx(map.bgTexture, pos, 0.0f, 1.0f, WHITE);
+        Map map = st->map;
+        DrawTextureEx(map.bgTexture, (Vector2) { 0 }, 0.0f, 1.0f, WHITE);
             
         // Draw stuff in camera coordinates in mode2D block 
         BeginMode2D(st->camera);

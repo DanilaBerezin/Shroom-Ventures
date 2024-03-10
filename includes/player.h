@@ -44,7 +44,7 @@ void InitPlayer(Player *play, Map map);
 /*
  * TODO: explanation here
  */
-Rectangle HitBox(Player *play);
+Rectangle HitBox(const Player *play);
 
 /*
  * TODO: explanation here

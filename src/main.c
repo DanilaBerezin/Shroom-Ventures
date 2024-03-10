@@ -16,51 +16,69 @@ int main(void) {
     // TODO: add these to compile time constants
     const int windowWidth = 1600;
     const int windowHeight = 900;
+    Arena arena = { 0 };
+    State st = { 0 };
     
     // Graphics stuff
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    // "VSYNC_HINT" tells the GPU to try to turn on VSYNC
+    //TODO: make app fullscreen by default, make default configurable
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(windowWidth, windowHeight);
-    SetExitKey(KEY_NULL);                                       // Disables the default behavior of closing window on 
-                                                                // ESC key
+    SetExitKey(KEY_NULL);
     SetTargetFPS(60);
-    
-    //TODO: make app fullscreen by default, make default configurable
 
     InitAudioDevice();
 
-    RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);  // RenderTexture allows us to stretch 
-                                                                            // screen while keeping aspect ratio
-    Arena arena = { 0 };
-    UserInputState inpSt = { 0 };
-    State st = { 0 };
-    
+    RenderTexture2D rendTarg = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);  
     SetTextureFilter(rendTarg.texture, TEXTURE_FILTER_BILINEAR); 
 
     CreateArena(&arena, 400);
-    assert(arena.err == false);
     
-    // TODO: don't make inpSt it's own thing and don't make it a pointer
-    st.inpState = &inpSt;
     st.currAppState = RUNNING;
     InitMap(&st.map, &arena);
     InitPlayer(&st.player, st.map);
     InitCamera(&st.camera, &st.player);
     
-    // TODO: put this in InitMap()
-    PlayMusicStream(st.map.bgMusic);
-    
     // Main game loop
     float accTime = 0;
     while (!WindowShouldClose()){
-        // Fixed time step implementation, doesn't handle death-spiral case
         NextSystemState(&st);
+
+        // Response to changes in global configurations
+        // TODO: save and restore un fullscreened screen position (peep: 
+        if ((st.inputReqs & TOGGLE_FULLSCREEN_REQ) &&
+            !st.isFullscreen) {
+            int monitor = GetCurrentMonitor();
+
+            st.isFullscreen = true;
+            st.prevScreenWidth = GetScreenWidth();
+            st.prevScreenHeight = GetScreenHeight();
+            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+
+            // Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390
+            BeginDrawing();
+            EndDrawing();
+            
+            ToggleFullscreen();
+        } else if ((st.inputReqs & TOGGLE_FULLSCREEN_REQ) &&
+            st.isFullscreen) {
+            st.isFullscreen = false;
+            ToggleFullscreen();
+            
+            // Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390
+            BeginDrawing();
+            EndDrawing();
+            
+            SetWindowSize(st.prevScreenWidth, st.prevScreenHeight);
+        }
+
         switch (st.currAppState) {
         case RUNNING: 
-            if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
+            if (st.inputReqs & TOGGLE_PAUSE_REQ) {
                 st.currAppState = PAUSED;
             }
 
+            // Fixed time step implementation, doesn't handle death-spiral case
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
@@ -69,12 +87,16 @@ int main(void) {
 
                 accTime -= DELTA_TIME;
             }
+            
+            // Draw the world
+            DrawWorldState(&st, rendTarg);
+            
+            // Play the sounds in the world
+            PlayPlayerSound(&st.player);
 
-            // Side effects of state 
-            DrawWorldState(&st, rendTarg);        
             break;
         case PAUSED:
-            if (st.inpState->inputRequests & PAUSE_UNPAUSE_REQUESTED) {
+            if (st.inputReqs & TOGGLE_PAUSE_REQ) {
                 st.currAppState = RUNNING;
             }
             
@@ -82,9 +104,8 @@ int main(void) {
             break;
         }
 
-        // Sound logic runs regardless of application state
+        // Background music runs regardless of application state
         UpdateMusicStream(st.map.bgMusic);
-        PlayPlayerSound(&st.player);
 
         // This block will draw the texture
         BeginDrawing();
@@ -104,11 +125,7 @@ int main(void) {
             dest.width = GAME_WIDTH * scale;
             dest.height = GAME_HEIGHT * scale;
     
-            Vector2 offset = { 0 };
-            offset.x = 0.0f;
-            offset.y = 0.0f;
-    
-            DrawTexturePro(rendTarg.texture, src, dest, offset, 0.0f, WHITE);
+            DrawTexturePro(rendTarg.texture, src, dest, (Vector2) { 0 }, 0.0f, WHITE);
     
             PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
         EndDrawing();
@@ -122,5 +139,6 @@ int main(void) {
     UnloadRenderTexture(rendTarg);
     CloseAudioDevice();
     CloseWindow();
+
     return 0;
 }

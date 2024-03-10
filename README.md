@@ -21,11 +21,14 @@ A fun 2D platformer I will be developing and my girlfriend (Gabby) will be doing
 11) ~~Refactor the code to get rid of the stupid design choice I made to make current
 	every component of current state an explicit function of previous state and 
 	current inputs~~
-12) Create a startup menu
-13) Figure out basic ai
-14) Load a map (maybe? see how it goes)
-15) ~~Reinstall raylib and link against archive instead of shared library~~
-16) ~~Make makefile configurable and not dependent on my setup~~
+12) ~~Finish implementing a fullscreen functionality~~
+13) Refactor player state
+14) Add double jump, slide, pull-up jump movements
+15) Figure out basic ai
+16) Load a map (maybe? see how it goes)
+17) Create a startup menu
+18) ~~Reinstall raylib and link statically instead of shared library~~
+19) ~~Make makefile configurable and not dependent on my setup~~
 
 ## Build instructions
 Currently, I support building on MSYS2 with the mingw64 environment on Windows, and natively on linux. This project does depend on **Raylib** which is a beautiful project and you should please take a moment to [check them out](https://github.com/raysan5/raylib/). Before building Shroom Ventures from source, follow the instructions on Raylibs github repo to build and install the Raylib library on your system.

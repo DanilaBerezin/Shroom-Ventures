@@ -17,6 +17,7 @@ qemu-system-x86_64  -hda $IMAGE_NAME \
                     -boot $BOOT_ORDER \
                     -enable-kvm \
                     -cpu $CPU \
+					-smp $(nproc) \
                     -m $MEM_SIZE \
                     -vga $GRAPHICS \
                     -nic $NET_TYPE,model=$NIC_MODEL \
