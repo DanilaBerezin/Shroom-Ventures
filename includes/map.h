@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "arena.h"
 
-#define G 1500
+#define G 1500 
 
 typedef struct {
     Rectangle   rect;

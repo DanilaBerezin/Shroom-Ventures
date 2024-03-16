@@ -19,11 +19,19 @@
 #define FRAME_TIME 0.2f
 
 void InitPlayer(Player *play, Map map) {
+    float playScale;
 	Platform gnd = map.mapPlats[0];
 
+    play->animTime = 0;
+    play->frames = LoadTexture("assets/player_frames.png");
+    playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
+
+    play->playJumpSound = false;
+    play->jumpSound = LoadSound("assets/jump.wav");
+
     play->pos.x = 500;
-    play->pos.y = gnd.rect.y - 150;
-    play->width = 100; 
+    play->pos.y = gnd.rect.y - (PLAYER_DEFAULT_HEIGHT + 50);
+    play->width = (int) (((float) play->frames.width / 5) * playScale); 
     play->height = PLAYER_DEFAULT_HEIGHT;
     play->vel.x = 0.0f;
     play->vel.y = 0.0f;
@@ -33,11 +41,6 @@ void InitPlayer(Player *play, Map map) {
     play->dashTime = 0.0f;
     play->walkTime = 0.0f;
 
-    play->animTime = 0;
-    play->frames = LoadTexture("assets/player_frames.png");
-
-    play->playJumpSound = false;
-    play->jumpSound = LoadSound("assets/jump.wav");
 }
 
 Rectangle HitBox(const Player *play) {
@@ -182,5 +185,3 @@ void PlayPlayerSound(Player *play) {
         play->playJumpSound = false;
     }
 }
-
-

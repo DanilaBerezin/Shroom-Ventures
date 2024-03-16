@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "state.h"
 #include "camera.h"
 #include "debug.h"
@@ -35,7 +33,7 @@ void DrawWorldState(State *st, RenderTexture2D rendTarg) {
 
         // Draw the background
         Map map = st->map;
-        DrawTextureEx(map.bgTexture, (Vector2) { 0 }, 0.0f, 1.0f, WHITE);
+        DrawTextureEx(map.bgTexture, (Vector2) { 0 }, 0.0f, 1.1f, WHITE);
             
         // Draw stuff in camera coordinates in mode2D block 
         BeginMode2D(st->camera);

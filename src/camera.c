@@ -42,7 +42,7 @@ void NextCamera(State *st) {
     st->camera.offset.x = currOffset + offSpeed * DELTA_TIME; 
     st->camera.offset.y = currCam.offset.y;
     
-    // Smoothing for currCam to follow target (player in this case)
+	// Player trackign, smoothing applied along x-axis
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;
@@ -56,4 +56,6 @@ void NextCamera(State *st) {
         adjust.x = diff;
         st->camera.target = Vector2Add(currCam.target, Vector2Scale(adjust, speed * DELTA_TIME / length));
     } 
+	
+	st->camera.target.y = st->player.pos.y + st->player.height / 2;
 }
