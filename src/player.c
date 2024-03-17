@@ -18,7 +18,7 @@
 #define DASH_COOL_DOWN_TIME 1.0f
 #define FRAME_TIME 0.2f
 
-#define PLAYER_FRAMES 5
+#define PLAYER_FRAMES 1
 
 void InitPlayer(Player *play, Map map) {
     float playScale;
@@ -26,8 +26,9 @@ void InitPlayer(Player *play, Map map) {
     
     // The SetTextureWrap() call is necessary to avoid weird artifact generation due 
     // to mipmap generation: https://github.com/raysan5/raylib/issues/724
+    // TODO: check out making the texture dimensions a power of 2
     play->animTime = 0;
-    play->frames = LoadTexture("assets/player_frames.png");
+    play->frames = LoadTexture("assets/high_qual.png");
     playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
     GenTextureMipmaps(&play->frames);
     SetTextureWrap(play->frames, TEXTURE_WRAP_CLAMP);  
@@ -164,7 +165,7 @@ void NextPlayer(State *st) {
 
     // Very simple implementation for now
     if (st->player.vel.x != 0) {
-        st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, 1.0f);
+        st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, PLAYER_FRAMES * FRAME_TIME);
     }
 }
 

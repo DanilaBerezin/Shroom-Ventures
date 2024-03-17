@@ -45,7 +45,7 @@ int main(void) {
         NextSystemState(&st);
 
         // Response to changes in global configurations
-        // TODO: save and restore un fullscreened screen position (peep: https://github.com/raysan5/raylib/issues/2415#issuecomment-1092030959)
+        // TODO: save and restore un-fullscreened screen position (peep: https://github.com/raysan5/raylib/issues/2415#issuecomment-1092030959)
         if ((st.inputReqs & TOGGLE_FULLSCREEN_REQ) &&
             !st.isFullscreen) {
             int monitor = GetCurrentMonitor();

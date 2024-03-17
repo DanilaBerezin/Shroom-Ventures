@@ -12,6 +12,7 @@ CFLAGS += $(CONFIG)
 CFILES := $(wildcard ./src/*.c)
 OBJS := $(patsubst ./src/%.c, ./bin/%.o, $(CFILES))
 DEPS := $(patsubst ./src/%.c, ./bin/%.d, $(CFILES))
+export LSAN_OPTIONS := suppressions=lsan.supp
 .PHONY: all release clean debug debug_target run
 
 all: debug_target
@@ -20,7 +21,7 @@ release: CFLAGS += -O2
 release: clean $(TARGET)
 
 debug: clean debug_target
-debug_target: CFLAGS += -Wconversion -Werror -Wno-error=conversion -g -O0 -D DEBUG
+debug_target: CFLAGS += -Wconversion -Werror -Wno-error=conversion -g -O0 -D DEBUG -fsanitize=address,undefined
 debug_target: $(TARGET)
 
 $(TARGET): $(OBJS)
