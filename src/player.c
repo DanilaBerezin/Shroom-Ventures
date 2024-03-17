@@ -18,20 +18,27 @@
 #define DASH_COOL_DOWN_TIME 1.0f
 #define FRAME_TIME 0.2f
 
+#define PLAYER_FRAMES 5
+
 void InitPlayer(Player *play, Map map) {
     float playScale;
 	Platform gnd = map.mapPlats[0];
-
+    
+    // The SetTextureWrap() call is necessary to avoid weird artifact generation due 
+    // to mipmap generation: https://github.com/raysan5/raylib/issues/724
     play->animTime = 0;
     play->frames = LoadTexture("assets/player_frames.png");
     playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
+    GenTextureMipmaps(&play->frames);
+    SetTextureWrap(play->frames, TEXTURE_WRAP_CLAMP);  
+    SetTextureFilter(play->frames, TEXTURE_FILTER_BILINEAR);
 
     play->playJumpSound = false;
     play->jumpSound = LoadSound("assets/jump.wav");
 
     play->pos.x = 500;
     play->pos.y = gnd.rect.y - (PLAYER_DEFAULT_HEIGHT + 50);
-    play->width = (int) (((float) play->frames.width / 5) * playScale); 
+    play->width = (int) (((float) play->frames.width / PLAYER_FRAMES) * playScale); 
     play->height = PLAYER_DEFAULT_HEIGHT;
     play->vel.x = 0.0f;
     play->vel.y = 0.0f;
@@ -163,7 +170,7 @@ void NextPlayer(State *st) {
 
 void DrawPlayer(Player *play) {
     uint32_t currFrame = (uint32_t) (play->animTime / FRAME_TIME);
-    uint32_t frameWidth = (uint32_t) play->frames.width / 5;
+    uint32_t frameWidth = (uint32_t) play->frames.width / PLAYER_FRAMES;
     Rectangle src, dest = HitBox(play);
     Vector2 origin = { 0 };
     
