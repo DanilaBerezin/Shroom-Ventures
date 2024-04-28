@@ -34,15 +34,15 @@ int main(void) {
 
     CreateArena(&arena, 400);
     
-    st.currAppState = RUNNING;
-    InitMap(&st.map, &arena);
-    InitPlayer(&st.player, st.map);
-    InitCamera(&st.camera, &st.player);
+    st.currAppState = PLAYING;
+    MapInit(&st.map, &arena);
+    PlayerInit(&st.player, st.map);
+    CameraInit(&st.camera, &st.player);
     
     // Main game loop
     float accTime = 0;
     while (!WindowShouldClose()){
-        NextSystemState(&st);
+        StateUpdateSystem(&st);
 
         // Response to changes in global configurations
         // TODO: save and restore un-fullscreened screen position (peep: https://github.com/raysan5/raylib/issues/2415#issuecomment-1092030959)
@@ -73,7 +73,7 @@ int main(void) {
         }
 
         switch (st.currAppState) {
-        case RUNNING: 
+        case PLAYING: 
             if (st.inputReqs & TOGGLE_PAUSE_REQ) {
                 st.currAppState = PAUSED;
             }
@@ -82,22 +82,22 @@ int main(void) {
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
-                NextPlayer(&st);
-                NextCamera(&st);
+                PlayerUpdate(&st);
+                CameraUpdate(&st);
 
                 accTime -= DELTA_TIME;
             }
             
             // Draw the world
-            DrawWorldState(&st, rendTarg);
+            StateDrawWorld(&st, rendTarg);
             
-            // Play the sounds in the world
-            PlayPlayerSound(&st.player);
+            // Handle audio triggers 
+            PlayerHandleAudioTriggers(&st.player);
 
             break;
         case PAUSED:
             if (st.inputReqs & TOGGLE_PAUSE_REQ) {
-                st.currAppState = RUNNING;
+                st.currAppState = PLAYING;
             }
             
             // TODO: insert shader here and a pause menu

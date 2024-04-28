@@ -18,9 +18,9 @@
 #define DASH_COOL_DOWN_TIME 1.0f
 #define FRAME_TIME 0.2f
 
-#define PLAYER_FRAMES 1
+#define PLAYER_FRAMES 5
 
-void InitPlayer(Player *play, Map map) {
+void PlayerInit(Player *play, Map map) {
     float playScale;
 	Platform gnd = map.mapPlats[0];
     
@@ -28,15 +28,15 @@ void InitPlayer(Player *play, Map map) {
     // to mipmap generation: https://github.com/raysan5/raylib/issues/724
     // TODO: check out making the texture dimensions a power of 2
     play->animTime = 0;
-    play->frames = LoadTexture("assets/high_qual.png");
-    playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
+    play->frames = LoadTexture("assets/player_frames.png");
     GenTextureMipmaps(&play->frames);
     SetTextureWrap(play->frames, TEXTURE_WRAP_CLAMP);  
     SetTextureFilter(play->frames, TEXTURE_FILTER_BILINEAR);
 
-    play->playJumpSound = false;
+    play->jumpAudioTrigger = false;
     play->jumpSound = LoadSound("assets/jump.wav");
 
+    playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
     play->pos.x = 500;
     play->pos.y = gnd.rect.y - (PLAYER_DEFAULT_HEIGHT + 50);
     play->width = (int) (((float) play->frames.width / PLAYER_FRAMES) * playScale); 
@@ -51,7 +51,7 @@ void InitPlayer(Player *play, Map map) {
 
 }
 
-Rectangle HitBox(const Player *play) {
+Rectangle PlayerHitBox(const Player *play) {
     Rectangle hitbox = { 0 };
 
     hitbox.x = play->pos.x;
@@ -62,7 +62,7 @@ Rectangle HitBox(const Player *play) {
     return hitbox;
 }
 
-void NextPlayer(State *st) {
+void PlayerUpdate(State *st) {
     const Map map = st->map;
     const Player currPlay = st->player;
 
@@ -72,7 +72,7 @@ void NextPlayer(State *st) {
         bool willColl; 
     } colInfo = { 0 };
     for (uint32_t i = 0; i < map.numPlats; i++) {
-        Rectangle currRect = HitBox(&currPlay);
+        Rectangle currRect = PlayerHitBox(&currPlay);
         Platform plat = map.mapPlats[i];
         
         // Check to see if collisions occurs
@@ -132,7 +132,7 @@ void NextPlayer(State *st) {
     if ((st->inputReqs & JUMP_REQ) && 
         fabs(currPlay.vel.y) <= G * DELTA_TIME) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
-        st->player.playJumpSound = true;
+        st->player.jumpAudioTrigger = true;
     } else if (snapPlayer || currPlay.isDash) {
         st->player.vel.y = 0;
     } else {
@@ -169,10 +169,10 @@ void NextPlayer(State *st) {
     }
 }
 
-void DrawPlayer(Player *play) {
+void PlayerDraw(Player *play) {
     uint32_t currFrame = (uint32_t) (play->animTime / FRAME_TIME);
     uint32_t frameWidth = (uint32_t) play->frames.width / PLAYER_FRAMES;
-    Rectangle src, dest = HitBox(play);
+    Rectangle src, dest = PlayerHitBox(play);
     Vector2 origin = { 0 };
     
     src.x = frameWidth * currFrame; 
@@ -187,9 +187,9 @@ void DrawPlayer(Player *play) {
     DrawTexturePro(play->frames, src, dest, origin, 0, WHITE);
 }
 
-void PlayPlayerSound(Player *play) {
-    if(play->playJumpSound) {
+void PlayerHandleAudioTriggers(Player *play) {
+    if(play->jumpAudioTrigger) {
         PlaySound(play->jumpSound);
-        play->playJumpSound = false;
+        play->jumpAudioTrigger = false;
     }
 }

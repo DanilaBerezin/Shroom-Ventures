@@ -9,7 +9,7 @@
 #include "map.h"
 
 enum AppState {
-    RUNNING,
+    PLAYING,
     PAUSED
 };
 
@@ -39,11 +39,11 @@ typedef struct state {
 /*
  * TODO: explanation here
  */
-void NextSystemState(State *st);
+void StateUpdateSystem(State *st);
 
 /*
  * TODO: explanation here
  */
-void DrawWorldState(State *st, RenderTexture2D rendTarg);
+void StateDrawWorld(State *st, RenderTexture2D rendTarg);
 
 #endif

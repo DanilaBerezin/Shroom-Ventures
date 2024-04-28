@@ -25,6 +25,6 @@ typedef struct map {
 /*
  * TODO: explanation here
  */
-void InitMap(Map *map, Arena *arena);
+void MapInit(Map *map, Arena *arena);
 
 #endif

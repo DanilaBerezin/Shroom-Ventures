@@ -22,7 +22,7 @@ static Platform CreatePlatform(
     return plat;
 }
 
-void InitMap(Map *map, Arena *arena) {
+void MapInit(Map *map, Arena *arena) {
     map->bgTexture = LoadTexture("assets/bg0.png");
     map->bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
 

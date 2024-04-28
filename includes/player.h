@@ -13,6 +13,14 @@ typedef enum {
     FACING_RIGHT
 } PlayerDir;
 
+typedef enum {
+    CROUCHING,
+    DASHING,
+    IDLE,
+    AIRBORNE,
+    RUNNING,
+} PlayerState;
+
 typedef struct player {
     // Physics
     Vector2     pos;
@@ -32,33 +40,33 @@ typedef struct player {
     Texture2D   frames;
 
     // Sound FX stuff
-    bool        playJumpSound;
+    bool        jumpAudioTrigger;
     Sound       jumpSound;
 } Player;
 
 /*
  * TODO: explanation here
  */
-void InitPlayer(Player *play, Map map);
+void PlayerInit(Player *play, Map map);
 
 /*
  * TODO: explanation here
  */
-Rectangle HitBox(const Player *play);
+Rectangle PlayerHitBox(const Player *play);
 
 /*
  * TODO: explanation here
  */
-void NextPlayer(State *st);
+void PlayerUpdate(State *st);
 
 /*
  * TODO: explanation here
  */
-void DrawPlayer(Player *play);
+void PlayerDraw(Player *play);
 
 /*
  * TODO: explanation here
  */
-void PlayPlayerSound(Player *play);
+void PlayerHandleAudioTriggers(Player *play);
 
 #endif

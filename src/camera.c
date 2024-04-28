@@ -2,7 +2,7 @@
 #include "state.h"
 #include "player.h"
 
-void InitCamera(Camera2D *cam, Player *play) {
+void CameraInit(Camera2D *cam, Player *play) {
 	cam->target.x = play->pos.x;
     cam->target.y = 0;
     // By default, the camera will position the target at the upper left hand corner (the origin), 
@@ -21,7 +21,7 @@ void InitCamera(Camera2D *cam, Player *play) {
  * doesn't seem to make a difference? Oh well I'll tinker with this
  * later
  */
-void NextCamera(State *st) {
+void CameraUpdate(State *st) {
     Camera2D currCam = st->camera;
 
     // PID smoothing for camera motion when you move left or right

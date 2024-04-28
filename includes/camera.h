@@ -8,11 +8,11 @@
 /*
  * TODO: explanation here
  */
-void InitCamera(Camera2D *cam, Player *play);
+void CameraInit(Camera2D *cam, Player *play);
 
 /*
  * TODO: explanation here
  */
-void NextCamera(State *st);
+void CameraUpdate(State *st);
 
 #endif

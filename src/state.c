@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "macros.h"
 
-void NextSystemState(State *st) {
+void StateUpdateSystem(State *st) {
     st->frameTime = GetFrameTime();
 
     // Request logic begins here
@@ -27,24 +27,28 @@ void NextSystemState(State *st) {
     st->inputReqs = requests;
 }
 
-void DrawWorldState(State *st, RenderTexture2D rendTarg) {
+void StateDrawWorld(State *st, RenderTexture2D rendTarg) {
 	BeginTextureMode(rendTarg);
-        ClearBackground(RAYWHITE);
+     
+    // Draw the background
+    Map map = st->map;
+    ClearBackground(RAYWHITE);
+    DrawTextureEx(map.bgTexture, (Vector2) { 0 }, 0.0f, 1.1f, WHITE);
+        
+    // Draw stuff in camera coordinates in mode2D block 
+    BeginMode2D(st->camera);
 
-        // Draw the background
-        Map map = st->map;
-        DrawTextureEx(map.bgTexture, (Vector2) { 0 }, 0.0f, 1.1f, WHITE);
-            
-        // Draw stuff in camera coordinates in mode2D block 
-        BeginMode2D(st->camera);
-            for (uint32_t i = 0; i < map.numPlats; i++) {
-                DrawRectangleRec(map.mapPlats[i].rect, map.mapPlats[i].color);
-            }
-            
-            DrawPlayer(&st->player);
-        EndMode2D();
+    for (uint32_t i = 0; i < map.numPlats; i++) {
+        DrawRectangleRec(map.mapPlats[i].rect, map.mapPlats[i].color);
+    }
 
-        DrawText("Move rectangle with doom keys", 10, 10, 50, BLACK);
+    PlayerDraw(&st->player);
+
+    EndMode2D();
+    
+    // The "HUD"
+    DrawText("Move rectangle with doom keys", 10, 10, 50, BLACK);
+
     EndTextureMode();
 }
 

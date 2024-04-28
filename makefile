@@ -12,7 +12,7 @@ CFLAGS += $(CONFIG)
 CFILES := $(wildcard ./src/*.c)
 OBJS := $(patsubst ./src/%.c, ./bin/%.o, $(CFILES))
 DEPS := $(patsubst ./src/%.c, ./bin/%.d, $(CFILES))
-export LSAN_OPTIONS := suppressions=lsan.supp
+export LSAN_OPTIONS := suppressions=.suppr_lsan
 .PHONY: all release clean debug debug_target run
 
 all: debug_target
