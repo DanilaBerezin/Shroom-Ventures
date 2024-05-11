@@ -41,7 +41,9 @@ typedef struct player {
 
     // Sound FX stuff
     bool        jumpAudioTrigger;
+    bool        dashAudioTrigger;
     Sound       jumpSound;
+    Sound       dashSound;
 } Player;
 
 /*

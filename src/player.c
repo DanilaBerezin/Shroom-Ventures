@@ -34,7 +34,9 @@ void PlayerInit(Player *play, Map map) {
     SetTextureFilter(play->frames, TEXTURE_FILTER_BILINEAR);
 
     play->jumpAudioTrigger = false;
-    play->jumpSound = LoadSound("assets/woosh.mp3");
+    play->dashAudioTrigger = false;
+    play->jumpSound = LoadSound("assets/jump.wav");
+    play->dashSound = LoadSound("assets/woosh.wav");
 
     playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
     play->pos.x = 500;
@@ -90,6 +92,7 @@ void PlayerUpdate(State *st) {
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && currPlay.walkTime > DASH_COOL_DOWN_TIME) {
         st->player.isDash = true;
         st->player.dashTime = currPlay.dashTime;
+        st->player.dashAudioTrigger = true;
     } else if (currPlay.isDash) {
         st->player.dashTime = currPlay.dashTime + DELTA_TIME;
     } 
@@ -188,8 +191,13 @@ void PlayerDraw(Player *play) {
 }
 
 void PlayerHandleAudioTriggers(Player *play) {
-    if(play->jumpAudioTrigger) {
+    if (play->jumpAudioTrigger) {
         PlaySound(play->jumpSound);
         play->jumpAudioTrigger = false;
+    }
+
+    if (play->dashAudioTrigger) {
+        PlaySound(play->dashSound);
+        play->dashAudioTrigger = false;
     }
 }
