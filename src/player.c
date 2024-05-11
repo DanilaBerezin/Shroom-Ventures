@@ -34,7 +34,7 @@ void PlayerInit(Player *play, Map map) {
     SetTextureFilter(play->frames, TEXTURE_FILTER_BILINEAR);
 
     play->jumpAudioTrigger = false;
-    play->jumpSound = LoadSound("assets/jump.wav");
+    play->jumpSound = LoadSound("assets/woosh.mp3");
 
     playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
     play->pos.x = 500;
