@@ -17,13 +17,13 @@ CONFIG += -D GAME_HEIGHT=1125#		# In pixels
 ifeq ($(PLATFORM),LINUX)
     # Linux defaults
     RAYLIB_INSTALL ?= /usr/local
-    LIBS ?= -lGL -lraylib -lm -lpthread -ldl -lrt -lX11 -lc -latomic
+    LIBS ?= -lGL -l:libraylib.a -lm -lpthread -ldl -lrt -lX11 
     TARGET ?= ./bin/$(TARGET_NAME)
 
 else ifeq ($(PLATFORM),MSYS)
     # MSYS2 defaults
     RAYLIB_INSTALL ?= /mingw64
-    LIBS ?= -lraylib -lopengl32 -lgdi32 -lwinmm
+    LIBS ?= -l:libraylib.a -lopengl32 -lgdi32 -lwinmm
     TARGET ?= ./bin/$(TARGET_NAME).exe
 
 else

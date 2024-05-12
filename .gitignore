@@ -1,0 +1,14 @@
+*~
+
+*.o
+*.so
+*.so.*
+*.out
+*.elf
+*.d
+
+*game*
+*shroom_ventures*
+Win10.iso
+test.im
+*libraylib.a*
