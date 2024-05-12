@@ -14,11 +14,12 @@ typedef enum {
 } PlayerDir;
 
 typedef enum {
-    CROUCHING,
-    DASHING,
     IDLE,
-    AIRBORNE,
     RUNNING,
+    AIRBORNE,
+    DASHING,
+    IDLE_CROUCH,
+    MOVING_CROUCH,
 } PlayerState;
 
 typedef struct player {
@@ -30,6 +31,7 @@ typedef struct player {
     PlayerDir   dir;
 
     // Internal state
+    PlayerState pState;
     bool        isCrouch;
     bool        isDash;
     float       dashTime;

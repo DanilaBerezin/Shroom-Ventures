@@ -64,6 +64,103 @@ Rectangle PlayerHitBox(const Player *play) {
     return hitbox;
 }
 
+void PlayerUpdate2(State *st) {
+    // const Map map = st->map;
+    const Player currPlay = st->player;
+    const float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2.0f;
+    bool regMovReq = false;
+
+    // TODO: this may break when player is dashing, we'll see...
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_D)) {
+        regMovReq = true;
+    }
+
+    // Check for collisions
+    // struct { 
+    //     Platform plat; 
+    //     bool willColl; 
+    // } colInfo = { 0 };
+    // for (uint32_t i = 0; i < map.numPlats; i++) {
+    //     Rectangle currRect = PlayerHitBox(&currPlay);
+    //     Platform plat = map.mapPlats[i];
+    //     
+    //     // Check to see if collisions occurs
+    //     if (CheckCollisionRecs(currRect, plat.rect)) {
+    //         colInfo.plat = plat;
+    //         colInfo.willColl = true;
+    //         break;
+    //     }
+    // }
+
+    // Determine player state
+    switch (currPlay.pState) {
+    case IDLE:
+        st->player.walkTime = currPlay.walkTime + DELTA_TIME;
+
+        if (IsKeyDown(KEY_LEFT_CONTROL) &&
+                   !regMovReq) {
+            st->player.pState = IDLE_CROUCH;    
+            st->player.pos.y = st->player.pos.y + crouchHeight;
+            st->player.height = crouchHeight;
+        } else if (IsKeyDown(KEY_LEFT_CONTROL) &&
+                   regMovReq) {
+            st->player.pState = MOVING_CROUCH;    
+            st->player.pos.y = st->player.pos.y + crouchHeight;
+            st->player.height = crouchHeight;
+        } else if (regMovReq) {
+            st->player.pState = RUNNING;
+            st->player.vel.x = IsKeyDown(KEY_A) ? -PLAYER_HOR_SPEED : PLAYER_HOR_SPEED;
+            st->player.dir = IsKeyDown(KEY_A) ? FACING_LEFT : FACING_RIGHT;
+        } else if (st->inputReqs & JUMP_REQ) {
+            st->player.pState = AIRBORNE;
+            st->player.vel.y = -PLAYER_JUMP_SPEED;
+            st->player.jumpAudioTrigger = true;
+        } else if (IsKeyDown(KEY_LEFT_SHIFT) && 
+                   currPlay.walkTime > DASH_COOL_DOWN_TIME) {
+            st->player.pState = DASHING;
+            st->player.walkTime = 0.0f;
+            st->player.dashTime = currPlay.dashTime;
+            st->player.dashAudioTrigger = true;
+        }  
+
+        return;
+    case RUNNING:
+        st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, PLAYER_FRAMES * FRAME_TIME);
+
+        if (currPlay.dir == FACING_LEFT &&
+            IsKeyDown(KEY_D) &&
+            !IsKeyDown(KEY_A)) {
+            st->player.dir = FACING_RIGHT;
+            st->player.vel.x = PLAYER_HOR_SPEED;
+        } else if (currPlay.dir == FACING_RIGHT &&
+            !IsKeyDown(KEY_D) &&
+            IsKeyDown(KEY_A)) {
+            st->player.dir = FACING_LEFT;
+            st->player.vel.x = -PLAYER_HOR_SPEED;
+        }
+
+        if (fabs(currPlay.vel.y) >= G * DELTA_TIME) {
+            st->player.pState = AIRBORNE;
+        } else if (st->inpReqs & JUMP_REQ) {
+            st->player.pState = AIRBORNE;
+            st->player.vel.y = -PLAYER_JUMP_SPEED;
+            st->player.jumpAudioTrigger = true;
+        } else if (!regMovReq) {
+            st->player.pState = IDLE;
+        }
+
+        break;
+    case AIRBORNE:
+        break;
+    case DASHING:
+        break;
+    case IDLE_CROUCH:
+        break;
+    case MOVING_CROUCH:
+        break;
+    }
+}
+
 void PlayerUpdate(State *st) {
     const Map map = st->map;
     const Player currPlay = st->player;
