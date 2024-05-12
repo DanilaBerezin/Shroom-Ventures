@@ -21,7 +21,9 @@ release: CFLAGS += -O2
 release: clean $(TARGET)
 
 debug: clean debug_target
+ifeq ($(PLATFORM),LINUX)
 debug_target: CFLAGS += -Wconversion -Werror -Wno-error=conversion -g -O0 -D DEBUG -fsanitize=address,undefined
+endif
 debug_target: $(TARGET)
 
 $(TARGET): $(OBJS)
