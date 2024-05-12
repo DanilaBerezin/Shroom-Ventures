@@ -141,7 +141,7 @@ void PlayerUpdate2(State *st) {
 
         if (fabs(currPlay.vel.y) >= G * DELTA_TIME) {
             st->player.pState = AIRBORNE;
-        } else if (st->inpReqs & JUMP_REQ) {
+        } else if (st->inputReqs & JUMP_REQ) {
             st->player.pState = AIRBORNE;
             st->player.vel.y = -PLAYER_JUMP_SPEED;
             st->player.jumpAudioTrigger = true;

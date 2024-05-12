@@ -2,7 +2,7 @@
 
 # You can configure this stuff, add to it etc.
 IMAGE_NAME=test.im
-MEM_SIZE=4G
+MEM_SIZE=8G
 BOOT_ORDER=c
 CPU=host
 GRAPHICS=std
