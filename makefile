@@ -18,7 +18,6 @@ export LSAN_OPTIONS := suppressions=.suppr_lsan
 all: debug_target
 
 release: CFLAGS += -O2
-release: CFLAGS += -static
 release: clean $(TARGET)
 
 debug: clean debug_target
