@@ -63,6 +63,8 @@ Rectangle PlayerHitBox(const Player *play);
  */
 void PlayerUpdate(State *st);
 
+void PlayerUpdate2(State *st);
+
 /*
  * TODO: explanation here
  */

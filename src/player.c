@@ -6,7 +6,7 @@
 #include "debug.h"
 
 // In pixels per second
-#define PLAYER_JUMP_SPEED 670.0f
+#define PLAYER_JUMP_SPEED 690.0f
 #define PLAYER_HOR_SPEED 625.0f
 #define PLAYER_DASH_SPEED 1500.0f
 
@@ -45,7 +45,8 @@ void PlayerInit(Player *play, Map map) {
     play->height = PLAYER_DEFAULT_HEIGHT;
     play->vel.x = 0.0f;
     play->vel.y = 0.0f;
-
+    
+    play->pState = AIRBORNE;
     play->isCrouch = false;
     play->isDash = false;
     play->dashTime = 0.0f;
@@ -65,32 +66,42 @@ Rectangle PlayerHitBox(const Player *play) {
 }
 
 void PlayerUpdate2(State *st) {
-    // const Map map = st->map;
+    const Map map = st->map;
     const Player currPlay = st->player;
     const float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2.0f;
     bool regMovReq = false;
-
-    // TODO: this may break when player is dashing, we'll see...
+    Vector2 nextVel;
+    Vector2 nextPos;
+    
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_D)) {
         regMovReq = true;
     }
+    
+    // TODO: now that I'm thinking about it, don't think this is a good idea ...
+    // Do all the physics before hand, commit them if we are airborne (and not
+    // about to hit a platform) or falling off a platform edge, or partially 
+    // commit them when we are running/dashing 
+    nextVel = Vector2Add(currPlay.vel, (Vector2) { 0, G * DELTA_TIME });
+    nextPos = Vector2Add(currPlay.pos, (Vector2) {nextVel.x * DELTA_TIME, nextVel.y * DELTA_TIME});
 
-    // Check for collisions
-    // struct { 
-    //     Platform plat; 
-    //     bool willColl; 
-    // } colInfo = { 0 };
-    // for (uint32_t i = 0; i < map.numPlats; i++) {
-    //     Rectangle currRect = PlayerHitBox(&currPlay);
-    //     Platform plat = map.mapPlats[i];
-    //     
-    //     // Check to see if collisions occurs
-    //     if (CheckCollisionRecs(currRect, plat.rect)) {
-    //         colInfo.plat = plat;
-    //         colInfo.willColl = true;
-    //         break;
-    //     }
-    // }
+    // Collision checking logic
+    struct { Platform plat; bool willColl; } colInfo = { 0 };
+    Rectangle nextRect = { 0 };
+    nextRect.x = nextPos.x;
+    nextRect.y = nextPos.y;
+    nextRect.width = currPlay.width;
+    nextRect.height = currPlay.height;
+
+    for (uint32_t i = 0; i < map.numPlats; i++) {
+        Platform plat = map.mapPlats[i];
+        
+        // Check to see if collision will occurs
+        if (CheckCollisionRecs(nextRect, plat.rect)) {
+            colInfo.plat = plat;
+            colInfo.willColl = true;
+            break;
+        }
+    }
 
     // Determine player state
     switch (currPlay.pState) {
@@ -98,7 +109,7 @@ void PlayerUpdate2(State *st) {
         st->player.walkTime = currPlay.walkTime + DELTA_TIME;
 
         if (IsKeyDown(KEY_LEFT_CONTROL) &&
-                   !regMovReq) {
+            !regMovReq) {
             st->player.pState = IDLE_CROUCH;    
             st->player.pos.y = st->player.pos.y + crouchHeight;
             st->player.height = crouchHeight;
@@ -107,7 +118,10 @@ void PlayerUpdate2(State *st) {
             st->player.pState = MOVING_CROUCH;    
             st->player.pos.y = st->player.pos.y + crouchHeight;
             st->player.height = crouchHeight;
-        } else if (regMovReq) {
+            st->player.vel.x = IsKeyDown(KEY_A) ? -PLAYER_HOR_SPEED : PLAYER_HOR_SPEED;
+            st->player.dir = IsKeyDown(KEY_A) ? FACING_LEFT : FACING_RIGHT;
+        } else if (!IsKeyDown(KEY_LEFT_CONTROL) &&
+                    regMovReq) {
             st->player.pState = RUNNING;
             st->player.vel.x = IsKeyDown(KEY_A) ? -PLAYER_HOR_SPEED : PLAYER_HOR_SPEED;
             st->player.dir = IsKeyDown(KEY_A) ? FACING_LEFT : FACING_RIGHT;
@@ -126,21 +140,22 @@ void PlayerUpdate2(State *st) {
         return;
     case RUNNING:
         st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, PLAYER_FRAMES * FRAME_TIME);
+        st->player.pos.x = nextPos.x;
 
-        if (currPlay.dir == FACING_LEFT &&
-            IsKeyDown(KEY_D) &&
-            !IsKeyDown(KEY_A)) {
+        if (currPlay.vel.x != PLAYER_HOR_SPEED && IsKeyDown(KEY_D) 
+                                               && !IsKeyDown(KEY_A)) {
             st->player.dir = FACING_RIGHT;
             st->player.vel.x = PLAYER_HOR_SPEED;
-        } else if (currPlay.dir == FACING_RIGHT &&
-            !IsKeyDown(KEY_D) &&
-            IsKeyDown(KEY_A)) {
+        } else if (currPlay.dir == FACING_RIGHT && !IsKeyDown(KEY_D) 
+                                                && IsKeyDown(KEY_A)) {
             st->player.dir = FACING_LEFT;
             st->player.vel.x = -PLAYER_HOR_SPEED;
         }
 
-        if (fabs(currPlay.vel.y) >= G * DELTA_TIME) {
+        if (!colInfo.willColl) {
             st->player.pState = AIRBORNE;
+            st->player.vel = nextVel;
+            st->player.pos = nextPos;
         } else if (st->inputReqs & JUMP_REQ) {
             st->player.pState = AIRBORNE;
             st->player.vel.y = -PLAYER_JUMP_SPEED;
@@ -151,6 +166,39 @@ void PlayerUpdate2(State *st) {
 
         break;
     case AIRBORNE:
+        bool snapPlayer = false;
+        float platTop = colInfo.plat.rect.y;
+        if (colInfo.willColl) {
+            float yPos = currPlay.pos.y;
+            float playBot = yPos + currPlay.height;
+            snapPlayer = (playBot <= platTop);
+        }
+
+        if (currPlay.vel.x != PLAYER_HOR_SPEED && IsKeyDown(KEY_D) 
+                                               && !IsKeyDown(KEY_A)) {
+            st->player.dir = FACING_RIGHT;
+            st->player.vel.x = PLAYER_HOR_SPEED;
+        } else if (currPlay.vel.x != -PLAYER_HOR_SPEED && !IsKeyDown(KEY_D) 
+                                                       && IsKeyDown(KEY_A)) {
+            st->player.dir = FACING_LEFT;
+            st->player.vel.x = -PLAYER_HOR_SPEED;
+        } else if (!regMovReq && currPlay.vel.x != 0.0f) {
+            st->player.vel.x = 0;
+        } else {
+            st->player.vel = nextVel;
+            st->player.pos = nextPos;
+        }
+
+        if (snapPlayer && regMovReq) {
+            st->player.pState = RUNNING;
+            st->player.vel.y = 0.0f;          
+            st->player.pos.y = platTop - currPlay.height;
+        } else if (snapPlayer && !regMovReq) {
+            st->player.pState = IDLE;
+            st->player.vel.y = 0.0f;          
+            st->player.pos.y = platTop - currPlay.height;
+        }
+
         break;
     case DASHING:
         break;
@@ -158,6 +206,8 @@ void PlayerUpdate2(State *st) {
         break;
     case MOVING_CROUCH:
         break;
+    default:
+        perror("Player in some indeterminant state, should not be happening");
     }
 }
 

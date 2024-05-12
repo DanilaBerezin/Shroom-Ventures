@@ -1,5 +1,5 @@
 #ifndef DEBUG_H
-#define DEBUG_G
+#define DEBUG_H
 
 #include <stdio.h>
 #include <assert.h>
@@ -9,11 +9,9 @@
 // Debugging macros
 #ifdef DEBUG
 #define GetFrameTime() DELTA_TIME;
-#define PRINT_FPS(x,y) DrawFPS((x), (y))
-#define dbg_print(...) printf(__VA_ARGS__)
 #else 
-#define PRINT_FPS(x,y)
-#define dbg_print(...)
+#define DrawFPS(x,y)
+#define printf(...)
 #endif
 
 #endif

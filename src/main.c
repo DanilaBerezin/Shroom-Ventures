@@ -21,7 +21,8 @@ int main(void) {
     
     // Graphics stuff
     //TODO: make app fullscreen by default, make default configurable
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);    
+	SetTraceLogLevel(LOG_NONE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(windowWidth, windowHeight);
     SetExitKey(KEY_NULL);
@@ -82,7 +83,7 @@ int main(void) {
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
                 // Update state here:
-                PlayerUpdate(&st);
+                PlayerUpdate2(&st);
                 CameraUpdate(&st);
 
                 accTime -= DELTA_TIME;
@@ -127,7 +128,7 @@ int main(void) {
     
             DrawTexturePro(rendTarg.texture, src, dest, (Vector2) { 0 }, 0.0f, WHITE);
     
-            PRINT_FPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
+            DrawFPS(GetScreenWidth() - 75, GetScreenHeight() - 20);
         EndDrawing();
     }
 
