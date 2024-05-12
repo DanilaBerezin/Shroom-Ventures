@@ -2,6 +2,9 @@ include config.mk
 
 CC := gcc
 CFLAGS := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wpedantic -Wvla
+ifeq ($(PLATFORM),MSYS)
+    CFLAGS += -static
+endif
 CFLAGS += -std=c11
 CFLAGS += -L$(RAYLIB_INSTALL)/lib
 CFLAGS += -I$(RAYLIB_INSTALL)/include
@@ -12,6 +15,7 @@ CFLAGS += $(CONFIG)
 CFILES := $(wildcard ./src/*.c)
 OBJS := $(patsubst ./src/%.c, ./bin/%.o, $(CFILES))
 DEPS := $(patsubst ./src/%.c, ./bin/%.d, $(CFILES))
+
 export LSAN_OPTIONS := suppressions=.suppr_lsan
 .PHONY: all release clean debug debug_target run
 
