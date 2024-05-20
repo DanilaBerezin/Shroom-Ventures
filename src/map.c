@@ -23,9 +23,9 @@ static Platform CreatePlatform(
 }
 
 void MapInit(Map *map, Arena *arena) {
-    map->bgTexture = LoadTexture("assets/bg0.png");
+    map->bgTexture = LoadTexture("../assets/bg0.png");
 
-    map->bgMusic = LoadMusicStream("assets/bg-soundtrack.mp3");
+    map->bgMusic = LoadMusicStream("../assets/bg-soundtrack.mp3");
     SetMusicVolume(map->bgMusic, 0.25f);
 
     map->numPlats = 4;

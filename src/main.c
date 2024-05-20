@@ -18,6 +18,9 @@ int main(void) {
     const int windowHeight = 900;
     Arena arena = { 0 };
     State st = { 0 };
+
+    // Platform agnostic way to change CWD to ./bin directory
+    ChangeDirectory(GetApplicationDirectory());
     
     // Graphics stuff
     //TODO: make app fullscreen by default, make default configurable

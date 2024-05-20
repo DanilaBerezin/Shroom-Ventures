@@ -28,15 +28,15 @@ void PlayerInit(Player *play, Map map) {
     // to mipmap generation: https://github.com/raysan5/raylib/issues/724
     // TODO: check out making the texture dimensions a power of 2
     play->animTime = 0;
-    play->frames = LoadTexture("assets/player_frames.png");
+    play->frames = LoadTexture("../assets/player_frames.png");
     GenTextureMipmaps(&play->frames);
     SetTextureWrap(play->frames, TEXTURE_WRAP_CLAMP);  
     SetTextureFilter(play->frames, TEXTURE_FILTER_BILINEAR);
 
     play->jumpAudioTrigger = false;
     play->dashAudioTrigger = false;
-    play->jumpSound = LoadSound("assets/jump.wav");
-    play->dashSound = LoadSound("assets/woosh.wav");
+    play->jumpSound = LoadSound("../assets/jump.wav");
+    play->dashSound = LoadSound("../assets/woosh.wav");
 
     playScale = (float) PLAYER_DEFAULT_HEIGHT / (float) play->frames.height;
     play->pos.x = 500;
