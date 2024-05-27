@@ -54,3 +54,9 @@ winrun:
 winclean:
 	$(MAKE) -C wintest -f winrun.mk clean
 
+# Obviously this target requires pandoc as a dependency
+test_README: 
+	pandoc -f markdown -t html README.md > out.html
+	firefox out.html
+	sleep 1
+	rm out.html
