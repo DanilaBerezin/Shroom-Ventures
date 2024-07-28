@@ -78,7 +78,8 @@ void PlayerUpdate2(State *st) {
         regMovReq = true;
     }
     
-    /* TODO: now that I'm thinking about it, don't think this is a good idea ...
+    /* TODO: the TODO below is bullshit, just redo the calculations
+     * TODO: now that I'm thinking about it, don't think this is a good idea ...
      * Do all the physics before hand, commit them if we are airborne (and not
      * about to hit a platform) or falling off a platform edge, or partially 
      * commit them when we are running/dashing 
@@ -110,20 +111,17 @@ void PlayerUpdate2(State *st) {
     case IDLE:
         st->player.walkTime = currPlay.walkTime + DELTA_TIME;
 
-        if (IsKeyDown(KEY_LEFT_CONTROL) &&
-            !regMovReq) {
+        if (IsKeyDown(KEY_LEFT_CONTROL) && !regMovReq) {
             st->player.pState = IDLE_CROUCH;    
             st->player.pos.y = st->player.pos.y + crouchHeight;
             st->player.height = crouchHeight;
-        } else if (IsKeyDown(KEY_LEFT_CONTROL) &&
-                   regMovReq) {
+        } else if (IsKeyDown(KEY_LEFT_CONTROL) && regMovReq) {
             st->player.pState = MOVING_CROUCH;    
             st->player.pos.y = st->player.pos.y + crouchHeight;
             st->player.height = crouchHeight;
             st->player.vel.x = IsKeyDown(KEY_A) ? -PLAYER_HOR_SPEED : PLAYER_HOR_SPEED;
             st->player.dir = IsKeyDown(KEY_A) ? FACING_LEFT : FACING_RIGHT;
-        } else if (!IsKeyDown(KEY_LEFT_CONTROL) &&
-                    regMovReq) {
+        } else if (!IsKeyDown(KEY_LEFT_CONTROL) && regMovReq) {
             st->player.pState = RUNNING;
             st->player.vel.x = IsKeyDown(KEY_A) ? -PLAYER_HOR_SPEED : PLAYER_HOR_SPEED;
             st->player.dir = IsKeyDown(KEY_A) ? FACING_LEFT : FACING_RIGHT;
@@ -144,15 +142,13 @@ void PlayerUpdate2(State *st) {
         st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, PLAYER_FRAMES * FRAME_TIME);
         st->player.pos.x = nextPos.x;
 
-        if (currPlay.vel.x != PLAYER_HOR_SPEED && IsKeyDown(KEY_D) 
-                                               && !IsKeyDown(KEY_A)) {
+        if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
             st->player.dir = FACING_RIGHT;
             st->player.vel.x = PLAYER_HOR_SPEED;
-        } else if (currPlay.dir == FACING_RIGHT && !IsKeyDown(KEY_D) 
-                                                && IsKeyDown(KEY_A)) {
+        } else if (!IsKeyDown(KEY_D) && IsKeyDown(KEY_A)) {
             st->player.dir = FACING_LEFT;
             st->player.vel.x = -PLAYER_HOR_SPEED;
-        }
+        } 
 
         if (!colInfo.willColl) {
             st->player.pState = AIRBORNE;
@@ -168,6 +164,9 @@ void PlayerUpdate2(State *st) {
 
         break;
     case AIRBORNE:
+        st->player.vel.y = nextVel.y;
+        st->player.pos = nextPos;
+
         bool snapPlayer = false;
         float platTop = colInfo.plat.rect.y;
         if (colInfo.willColl) {
@@ -176,20 +175,15 @@ void PlayerUpdate2(State *st) {
             snapPlayer = (playBot <= platTop);
         }
 
-        if (currPlay.vel.x != PLAYER_HOR_SPEED && IsKeyDown(KEY_D) 
-                                               && !IsKeyDown(KEY_A)) {
+        if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) {
             st->player.dir = FACING_RIGHT;
             st->player.vel.x = PLAYER_HOR_SPEED;
-        } else if (currPlay.vel.x != -PLAYER_HOR_SPEED && !IsKeyDown(KEY_D) 
-                                                       && IsKeyDown(KEY_A)) {
+        } else if (!IsKeyDown(KEY_D) && IsKeyDown(KEY_A)) {
             st->player.dir = FACING_LEFT;
             st->player.vel.x = -PLAYER_HOR_SPEED;
         } else if (!regMovReq && currPlay.vel.x != 0.0f) {
             st->player.vel.x = 0;
-        } else {
-            st->player.vel = nextVel;
-            st->player.pos = nextPos;
-        }
+        } 
 
         if (snapPlayer && regMovReq) {
             st->player.pState = RUNNING;
@@ -203,6 +197,10 @@ void PlayerUpdate2(State *st) {
 
         break;
     case DASHING:
+        if (currPlay.dashTime + DELTA_TIME <= MAX_DASH_TIME) {
+            st->player.dashTime = currPlay.dashTime + DELTA_TIME;
+        }
+            
         break;
     case IDLE_CROUCH:
         break;
