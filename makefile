@@ -1,7 +1,9 @@
 include config.mk
 
 CC := gcc
-CFLAGS := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wpedantic -Wvla
+
+# -MD gcc flag automatically creates make rules for each header dependency
+CFLAGS := -Wall -Wextra -Wpedantic -Wvla
 ifeq ($(PLATFORM),MSYS)
     CFLAGS += -static
 endif
@@ -9,14 +11,14 @@ CFLAGS += -std=c11
 CFLAGS += -L$(RAYLIB_INSTALL)/lib
 CFLAGS += -I$(RAYLIB_INSTALL)/include
 CFLAGS += -I./includes
-# -MD automatically creates make rules for each header dependency
 CFLAGS += -MD
 CFLAGS += $(CONFIG)
+
 CFILES := $(wildcard ./src/*.c)
 OBJS := $(patsubst ./src/%.c, ./bin/%.o, $(CFILES))
 DEPS := $(patsubst ./src/%.c, ./bin/%.d, $(CFILES))
 
-export LSAN_OPTIONS := suppressions=.suppr_lsan
+export LSAN_OPTIONS := suppressions=../.suppr_lsan
 .PHONY: all release clean debug debug_target run
 
 all: debug_target

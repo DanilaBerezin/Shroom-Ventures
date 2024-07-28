@@ -12,19 +12,21 @@
 #include "macros.h"
 
 int main(void) {
-    // Initializing application stuff 
-    // TODO: add these to compile time constants
+    /* Initializing application stuff 
+     * TODO: add these to compile time constants 
+     */
     const int windowWidth = 1600;
     const int windowHeight = 900;
     Arena arena = { 0 };
     State st = { 0 };
 
-    // Platform agnostic way to change CWD to ./bin directory
+    /* Platform agnostic way to change CWD to ./bin directory */
     ChangeDirectory(GetApplicationDirectory());
     
-    // Graphics stuff
-    //TODO: make app fullscreen by default, make default configurable
-	SetTraceLogLevel(LOG_NONE);
+    /* Graphics stuff
+     * TODO: make app fullscreen by default, make default configurable
+	 */
+    SetTraceLogLevel(LOG_NONE);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(windowWidth, windowHeight, "Shroom Ventures!");
     SetWindowMinSize(windowWidth, windowHeight);
@@ -43,13 +45,14 @@ int main(void) {
     PlayerInit(&st.player, st.map);
     CameraInit(&st.camera, &st.player);
     
-    // Main game loop
+    /* Main game loop */
     float accTime = 0;
     while (!WindowShouldClose()){
         StateUpdateSystem(&st);
 
-        // Response to changes in global configurations
-        // TODO: save and restore un-fullscreened screen position (peep: https://github.com/raysan5/raylib/issues/2415#issuecomment-1092030959)
+        /* Response to changes in global configurations
+         * TODO: save and restore un-fullscreened screen position (peep: https://github.com/raysan5/raylib/issues/2415#issuecomment-1092030959)
+         */
         if ((st.inputReqs & TOGGLE_FULLSCREEN_REQ) &&
             !st.isFullscreen) {
             int monitor = GetCurrentMonitor();
@@ -59,7 +62,7 @@ int main(void) {
             st.prevScreenHeight = GetScreenHeight();
             SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
 
-            // Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390
+            /* Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390 */
             BeginDrawing();
             EndDrawing();
             
@@ -69,7 +72,7 @@ int main(void) {
             st.isFullscreen = false;
             ToggleFullscreen();
             
-            // Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390
+            /* Fullscreen Workaround: https://github.com/raysan5/raylib/issues/3390 */
             BeginDrawing();
             EndDrawing();
             
@@ -82,20 +85,20 @@ int main(void) {
                 st.currAppState = PAUSED;
             }
 
-            // Fixed time step implementation, doesn't handle death-spiral case
+            /* Fixed time step implementation, doesn't handle death-spiral case */
             accTime += st.frameTime;
             while (accTime > DELTA_TIME){
-                // Update state here:
+                /* Update state here */
                 PlayerUpdate2(&st);
                 CameraUpdate(&st);
 
                 accTime -= DELTA_TIME;
             }
             
-            // Draw the world
+            /* Draw the world */
             StateDrawWorld(&st, rendTarg);
             
-            // Handle audio triggers 
+            /* Handle audio triggers */
             PlayerHandleAudioTriggers(&st.player);
 
             break;
@@ -104,14 +107,14 @@ int main(void) {
                 st.currAppState = PLAYING;
             }
             
-            // TODO: insert shader here and a pause menu
+            /* TODO: insert shader here and a pause menu */
             break;
         }
 
-        // Background music runs regardless of application state
+        /* Background music runs regardless of application state */
         UpdateMusicStream(st.map.bgMusic);
 
-        // This block will draw the texture
+        /* This block will draw the texture */
         BeginDrawing();
             ClearBackground(BLACK);
     
@@ -122,7 +125,7 @@ int main(void) {
             src.width = rendTarg.texture.width;
             src.height = -rendTarg.texture.height;
     
-            // This destination rect will scale the screen while keeping it centered
+            /* This destination rect will scale the screen while keeping it centered */
             Rectangle dest = { 0 };
             dest.x = 0.5f * ((float) GetScreenWidth() - (float) GAME_WIDTH * scale);
             dest.y = 0.5f * ((float) GetScreenHeight() - (float) GAME_HEIGHT * scale);
@@ -135,7 +138,7 @@ int main(void) {
         EndDrawing();
     }
 
-    // TODO: get rid of this stuff except for maybe CloseWindow()?
+    /* TODO: get rid of this stuff except for maybe CloseWindow()? */
     UnloadTexture(st.map.bgTexture);
     UnloadMusicStream(st.map.bgMusic);
     UnloadSound(st.player.jumpSound);

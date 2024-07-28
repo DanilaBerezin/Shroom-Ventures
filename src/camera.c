@@ -5,16 +5,13 @@
 void CameraInit(Camera2D *cam, Player *play) {
 	cam->target.x = play->pos.x;
     cam->target.y = 0;
-    // By default, the camera will position the target at the upper left hand corner (the origin), 
-    // this offset allows you to move the camera so that it is centered on the target 
-    cam->offset.x = (float) GAME_WIDTH / 2.0f;
-    cam->offset.y = (float) GAME_HEIGHT / 2.0f;
+    cam->offset.x = (float) GAME_WIDTH / 2.0f; 
+    cam->offset.y = (float) GAME_HEIGHT / 2.0f; /* Offset allows us to center at target instead of upper-left hand corner of screen */
     cam->rotation = 0.0f;
     cam->zoom = 1.0f;
 }
 
-/* 
- * NOTE: for some reason the smoothing here ends up resulting in a 
+/* NOTE: for some reason the smoothing here ends up resulting in a 
  * sort of course grain appearance. Probably something internal to
  * raylib though the devs deny it lol. Funnily enough casting the 
  * values to ints makes it look a bit smoother imo and rounding
@@ -24,7 +21,7 @@ void CameraInit(Camera2D *cam, Player *play) {
 void CameraUpdate(State *st) {
     Camera2D currCam = st->camera;
 
-    // PID smoothing for camera motion when you move left or right
+    /* PID smoothing for camera motion when you move left or right */
     const float offsetCoeff = 2.0f;
     const float maxDiff = 400.0f;
     float currOffset = currCam.offset.x;
@@ -42,7 +39,7 @@ void CameraUpdate(State *st) {
     st->camera.offset.x = currOffset + offSpeed * DELTA_TIME; 
     st->camera.offset.y = currCam.offset.y;
     
-	// Player trackign, smoothing applied along x-axis
+	/* Player tracking, smoothing applied along x-axis */
     const float minSpeed = 110;
     const float minEffectLength = 10;
     const float fractionSpeed = 3.5f;

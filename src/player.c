@@ -5,15 +5,15 @@
 #include "map.h"
 #include "debug.h"
 
-// In pixels per second
+/* In pixels per second */
 #define PLAYER_JUMP_SPEED 690.0f
 #define PLAYER_HOR_SPEED 625.0f
 #define PLAYER_DASH_SPEED 1500.0f
 
-// In pixels
+/* In pixels */
 #define PLAYER_DEFAULT_HEIGHT 100 
 
-// In seconds
+/* In seconds */
 #define MAX_DASH_TIME 0.15f
 #define DASH_COOL_DOWN_TIME 1.0f
 #define FRAME_TIME 0.2f
@@ -24,9 +24,10 @@ void PlayerInit(Player *play, Map map) {
     float playScale;
 	Platform gnd = map.mapPlats[0];
     
-    // The SetTextureWrap() call is necessary to avoid weird artifact generation due 
-    // to mipmap generation: https://github.com/raysan5/raylib/issues/724
-    // TODO: check out making the texture dimensions a power of 2
+    /* The SetTextureWrap() call is necessary to avoid weird artifact generation due 
+     * to mipmap generation: https://github.com/raysan5/raylib/issues/724
+     * TODO: check out making the texture dimensions a power of 2 
+     */
     play->animTime = 0;
     play->frames = LoadTexture("../assets/player_frames.png");
     GenTextureMipmaps(&play->frames);
@@ -77,14 +78,15 @@ void PlayerUpdate2(State *st) {
         regMovReq = true;
     }
     
-    // TODO: now that I'm thinking about it, don't think this is a good idea ...
-    // Do all the physics before hand, commit them if we are airborne (and not
-    // about to hit a platform) or falling off a platform edge, or partially 
-    // commit them when we are running/dashing 
+    /* TODO: now that I'm thinking about it, don't think this is a good idea ...
+     * Do all the physics before hand, commit them if we are airborne (and not
+     * about to hit a platform) or falling off a platform edge, or partially 
+     * commit them when we are running/dashing 
+     */
     nextVel = Vector2Add(currPlay.vel, (Vector2) { 0, G * DELTA_TIME });
-    nextPos = Vector2Add(currPlay.pos, (Vector2) {nextVel.x * DELTA_TIME, nextVel.y * DELTA_TIME});
+    nextPos = Vector2Add(currPlay.pos, (Vector2) { nextVel.x * DELTA_TIME, nextVel.y * DELTA_TIME });
 
-    // Collision checking logic
+    /* Collision checking logic */
     struct { Platform plat; bool willColl; } colInfo = { 0 };
     Rectangle nextRect = { 0 };
     nextRect.x = nextPos.x;
@@ -95,7 +97,7 @@ void PlayerUpdate2(State *st) {
     for (uint32_t i = 0; i < map.numPlats; i++) {
         Platform plat = map.mapPlats[i];
         
-        // Check to see if collision will occurs
+        /* Check to see if collision will occurs */
         if (CheckCollisionRecs(nextRect, plat.rect)) {
             colInfo.plat = plat;
             colInfo.willColl = true;
@@ -103,7 +105,7 @@ void PlayerUpdate2(State *st) {
         }
     }
 
-    // Determine player state
+    /* Determine player state */
     switch (currPlay.pState) {
     case IDLE:
         st->player.walkTime = currPlay.walkTime + DELTA_TIME;
@@ -215,7 +217,7 @@ void PlayerUpdate(State *st) {
     const Map map = st->map;
     const Player currPlay = st->player;
 
-    // Check for collisions
+    /* Check for collisions */
     struct { 
         Platform plat; 
         bool willColl; 
@@ -224,7 +226,7 @@ void PlayerUpdate(State *st) {
         Rectangle currRect = PlayerHitBox(&currPlay);
         Platform plat = map.mapPlats[i];
         
-        // Check to see if collisions occurs
+        /* Check to see if collisions occurs */
         if (CheckCollisionRecs(currRect, plat.rect)) {
             colInfo.plat = plat;
             colInfo.willColl = true;
@@ -232,7 +234,7 @@ void PlayerUpdate(State *st) {
         }
     }
 
-    // Dash state logic
+    /* Dash state logic */
     if (currPlay.dashTime + DELTA_TIME > MAX_DASH_TIME) {
         st->player.isDash = false;
         st->player.dashTime = 0.0f;
@@ -244,7 +246,7 @@ void PlayerUpdate(State *st) {
         st->player.dashTime = currPlay.dashTime + DELTA_TIME;
     } 
 
-    // Determine x-component of speed
+    /* Determine x-component of speed */
     float xSpeed;
     if (st->player.isDash && !currPlay.isCrouch) {
         st->player.walkTime = 0.0f;
@@ -254,8 +256,9 @@ void PlayerUpdate(State *st) {
         st->player.walkTime = currPlay.walkTime + DELTA_TIME;
     }
 
-    // Calculate x-component of velocity, coupled with dash state logic
-    // Also determines player direction
+    /* Calculate x-component of velocity, coupled with dash state logic
+     * Also determines player direction
+     */
     if (st->player.isDash && currPlay.isDash) {
         st->player.vel.x = currPlay.vel.x;
     } else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
@@ -268,7 +271,7 @@ void PlayerUpdate(State *st) {
         st->player.vel.x = 0;
     } 
 
-    // Logic to determine if we need to snap player to a platform
+    /* Logic to determine if we need to snap player to a platform */
     bool snapPlayer = false;
     if (colInfo.willColl) {
         float prevYPos = currPlay.pos.y - currPlay.vel.y * DELTA_TIME;
@@ -277,8 +280,9 @@ void PlayerUpdate(State *st) {
         snapPlayer = (prevPlayBot <= platTop);
     }
 
-    // Calculate y-component of velocity, coupled with dash state logic as well
-    // TODO: use player state to determine whether a jump can occur instead
+   /* Calculate y-component of velocity, coupled with dash state logic as well
+    * TODO: use player state to determine whether a jump can occur instead
+    */ 
     if ((st->inputReqs & JUMP_REQ) && 
         fabs(currPlay.vel.y) <= G * DELTA_TIME) {
         st->player.vel.y = -PLAYER_JUMP_SPEED;
@@ -289,10 +293,10 @@ void PlayerUpdate(State *st) {
         st->player.vel.y = currPlay.vel.y + G * DELTA_TIME;
     }
 
-    // Calculate x-component of position. Coupled to x-component of velocity
+    /* Calculate x-component of position. Coupled to x-component of velocity */
     st->player.pos.x = currPlay.pos.x + st->player.vel.x * DELTA_TIME;
 
-    // Calculate y-component of position. Coupled to y-component of velocity. 
+    /* Calculate y-component of position. Coupled to y-component of velocity. */
     if (snapPlayer && st->player.vel.y >= 0) {
         Platform colPlat = colInfo.plat;
         st->player.pos.y = colPlat.rect.y - currPlay.height;
@@ -300,8 +304,9 @@ void PlayerUpdate(State *st) {
         st->player.pos.y = currPlay.pos.y + st->player.vel.y * DELTA_TIME;
     }
 
-    // Crouch logic changed y-position, so is unfortunately coupled to y-position
-    // calculations and has to be run after y-position is calculated
+    /* Crouch logic changed y-position, so is unfortunately coupled to y-position
+     * calculations and has to be run after y-position is calculated
+     */
     float crouchHeight = PLAYER_DEFAULT_HEIGHT / 2;
     if (IsKeyDown(KEY_LEFT_CONTROL) && !currPlay.isCrouch) { 
         st->player.pos.y = st->player.pos.y + crouchHeight;
@@ -313,7 +318,7 @@ void PlayerUpdate(State *st) {
         st->player.isCrouch = false;
     } 
 
-    // Very simple implementation for now
+    /* Very simple implementation for now */
     if (st->player.vel.x != 0) {
         st->player.animTime = fmodf(currPlay.animTime + DELTA_TIME, PLAYER_FRAMES * FRAME_TIME);
     }
